@@ -3,6 +3,12 @@ uuid = "5b7a77ca-73d2-46a8-bc51-f10182fcfdd6"
 authors = ["AndreasKuhn-ak <andreaskuhn92@gmx.net> and contributors"]
 version = "1.0.0-DEV"
 
+[deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
+Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
+
 [compat]
 julia = "1"
 
