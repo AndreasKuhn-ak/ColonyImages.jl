@@ -1,3 +1,12 @@
+"""
+This file contains functions that are used to generate artificial binary images of trypansonma colonies and to analyse artifical and real images.
+"""
+
+
+"""
+Imput is a 2D Int or Float array (an image), output are the discrete coordinates of the centroid of the image. The intensity/values of the pixels/array entrys
+are interpreted as physical weight in the centroid calculation. The centroid is calculated as the weighted mean of the pixel coordinates. 
+"""
 function centroid(img)
     Y,X = size(img)
     centroid = Float64[0.0,0.0]
@@ -46,16 +55,26 @@ function lattice_points(r::Int)
     return points3
 end
 
+"""
+Calculates the number of pixels == 1 in a binary image. 
+"""
 function occupied_points(img)
     return sum(img)/(size(img)[1]*size(img)[2])
 end
 
+
+"""
+calculates the approximate diameter of a colony by summing up all the pixel values and taking the square root of the sum.
+"""    
 function approx_radi_colo(img)
     return sum(img)^(1/2)
 end
     
-    
-function create_kernel(rad;  geometry = "circle")
+
+"""
+Creates a binary image kernel with a given radius. The kernel can be either a circle or a square. 
+"""
+function create_kernel(rad;  geometry::String = "circle")
     kernel = zeros( 2*rad + 1, 2*rad + 1 )
     if geometry == "circle"
         for x in 1:2*rad+1, y in 1:2*rad+1
@@ -69,6 +88,10 @@ function create_kernel(rad;  geometry = "circle")
     return kernel 
 end
 
+
+"""
+Creates a binary image with same size as input image. The binary image is a circle with a given center. The circle is 
+"""
 function build_circle(center, img, points;threshold = 0.8)
     circle_kernel = zeros(Int, size(img))
     r = 1
@@ -89,6 +112,10 @@ function build_circle(center, img, points;threshold = 0.8)
     end
     return circle_kernel 
 end
+
+
+
+
 
 function build_artifical_colony!(center, img, radius, points)
     r = 0
