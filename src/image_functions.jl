@@ -380,16 +380,23 @@ end
 b_w_n(img) = (round.(Int64,Float64.(Gray.(img))).-1).*-1
 b_w_i(img )= round.(Int64,Float64.(Gray.(img)))
 
+
+"""
+Converts an grayscale colony image into a binary image/BitArray. Checks if more than half of image is black and inverts it in that case
+As the colony is always much smaller that the background, this ensures that in the output image the pixels inside the
+colony are always set to 1 and the background pixels to 0, no matter the invertion status of the input image . 
+"""
 function b_w(img)
     img = b_w_i(img)
     if sum(img) >= prod(size(img))*0.5
         img = (img .-1) .*-1 
     end
-    return img
+    return Bool.(img)
 end
 
-
-
+"""
+Filles holes in 
+"""
 function fill_holes(img,size_holes)
     size_absolut = size(img)[1]*size(img)[2]*size_holes 
     
