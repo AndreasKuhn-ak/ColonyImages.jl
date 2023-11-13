@@ -1,6 +1,4 @@
-"""
-This file contains functions that are used to generate artificial binary images of trypansonma colonies and to analyse artifical and real images.
-"""
+
 
 
 """
@@ -64,7 +62,8 @@ end
 
 
 """
-calculates the approximate diameter of a colony by summing up all the pixel values and taking the square root of the sum.
+Calculates the approximate diameter of a colony by summing up all the pixel values and taking the square root of the sum.
+
 """    
 function approx_radi_colo(img)
     return sum(img)^(1/2)
@@ -90,7 +89,7 @@ end
 
 
 """
-Creates a binary image with same size as input image. The binary image is a circle with a given center. The circle is 
+12 Creates a binary image with same size as input image. The binary image is a circle with a given center. The circle is 
 """
 function build_circle(center, img, points;threshold = 0.8)
     circle_kernel = zeros(Int, size(img))
@@ -357,6 +356,11 @@ function generate_dir_vec(number_fingers, rand_dist)
 end
     
 
+"""
+Creates a Convolution of an Image with a given kernel. The input image is a 2D Int or Float array. 
+The kernel is a smaller 2D Int or Float array.
+The output is a 2D FLoat64 array with the same size the input image. 
+"""
 function conv( img, kernel )
     csize = size(img) .+ size(kernel) .- 1
     padimg = zeros( ComplexF32, csize )

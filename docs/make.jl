@@ -1,7 +1,12 @@
-using ColonyImages
 using Documenter
+using ColonyImages
 
-DocMeta.setdocmeta!(ColonyImages, :DocTestSetup, :(using ColonyImages); recursive=true)
+
+#DocMeta.setdocmeta!(ColonyImages, :DocTestSetup, :(using ColonyImages); recursive=true)
+#makedocs(modules = [ColonyImages], sitename = "ColonyImages.jl",remotes = nothing)
+
+
+
 
 makedocs(;
     modules=[ColonyImages],
@@ -23,3 +28,4 @@ deploydocs(;
     repo="github.com/AndreasKuhn-ak/ColonyImages.jl",
     devbranch="master",
 )
+

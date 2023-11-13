@@ -5,6 +5,5 @@ Documentation for [ColonyImages](https://github.com/AndreasKuhn-ak/ColonyImages.
 
 
 ```@autodocs
-Modules = [ColonyImages]
-Order   = [:function, :type]
+    Modules = [ColonyImages]
 ```
