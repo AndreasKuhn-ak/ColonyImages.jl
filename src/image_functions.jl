@@ -493,6 +493,7 @@ function generate_dir_vec(number_fingers, rand_dist)
     dir = [[y[i],x[i]] for i in 1:length(y)]
 
 return dir
+end
     
 
 """
