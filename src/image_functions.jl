@@ -1,47 +1,96 @@
-
-
-
 """
-Imput is a 2D Int or Float array (an image), output are the discrete coordinates of the centroid of the image. The intensity/values of the pixels/array entrys
-are interpreted as physical weight in the centroid calculation. The centroid is calculated as the weighted mean of the pixel coordinates. 
+    centroid(img)
+
+Calculates the centroid of a given image `img`.
+
+The centroid is calculated as the average of the x and y coordinates of all non-zero pixels in the image, 
+weighted by their intensity. The coordinates are then rounded to the nearest integer.
+
+# Arguments
+- `img`: A 2D array representing the image. Non-zero values are considered as part of the object to find the centroid of.
+
+# Returns
+- `centroid_norm::Vector{Int64}`: A vector containing the x and y coordinates of the centroid.
+
 """
 function centroid(img)
+    # Get the size of the image
     Y,X = size(img)
+
+    # Initialize the centroid and counter
     centroid = Float64[0.0,0.0]
     counter = 0
+
+    # Iterate over all pixels in the image
     for x in 1:X
         for y in 1:Y
+            # If the pixel is part of the object (non-zero), update the centroid and counter
             if img[y,x] != 0
                 counter += img[y,x]
                 centroid += img[y,x].*[y,x]
             end
         end
     end
+
+    # Normalize the centroid by the total intensity of the object
     centroid_norm = round.(Int64,centroid./counter)
+
     return centroid_norm
 end
 
 
 """
-Calcultes ascending integer pairs which fit into a circle with radius r.
-The return type is a Vector{Vector{Vector{Int}}} where as the first index is corresponds to r and the second for a individual pair
+    lattice_points(r::Int)
+
+Generates a lattice of points within a circle of radius `r`.
+
+The function returns a nested vector of points, each represented by its x and y coordinates. 
+The points are sorted by their distance from the origin and grouped into bands, 
+each band containing points that have a similar distance to the origin.
+
+# Arguments
+- `r::Int`: The radius of the circle within which the lattice points are generated.
+
+# Returns
+- `points3::Vector{Vector{Vector{Int}}}`: A nested vector of points.
+
+`points3` is a vector of vectors of `Lattice vectors` in ascending order by their length . Whereas the first entry of `Points` contains a vector of all lattice vectors which lengths are lower than 2:
+```julia
+Points[1] = [[0, 1], [0, 1], [0, -1], [0, -1], [1, 0], [-1, 0], [1, 0], [-1, 0], [1, 1], [-1, 1], [1, -1], [-1, -1]]
+```
+`Points[2]` does the same for length lower than 3:
+```julia
+Points[2] = [[0, 2], [0, 2], [0, -2], [0, -2], [2, 0], [-2, 0], [2, 0], [-2, 0], [1, 2], [-1, 2], [1, -2], [-1, -2], [2, 1], [-2, 1], [2, -1], [-2, -1], [2, 2], [-2, 2], [2, -2], [-2, -2]]
+```
+and so on...
+
 """
 function lattice_points(r::Int)
+    # Initialize the vector of points
     points = Vector{Vector{Real}}(undef,0)
+
+    # Generate the points within the circle
     for x in 0:r , y in 0:r
         if !(x == 0 && y== 0)
             if sqrt(x^2 +y^2)< r
-                push!(points,[x,y,sqrt(x^2 +y^2)],[-x,y,sqrt(x^2 +y^2)],[x,-y,sqrt(x^2 +y^2)],[-x,-y,sqrt(x^2 +y^2)])
+                # Add the point and its reflections in the other quadrants
+                push!(points,[x,y,sqrt(x^2 +y^2)],[-x,y,sqrt(x^2 +y^2)],[-x,-y,sqrt(x^2 +y^2)],[x,-y,sqrt(x^2 +y^2)])
             end
         end
     end
+
+    # Sort the points by their distance from the origin
     sort!(points, by = x-> x[3])
+
+    # Round the coordinates of the points to the nearest integer
     points_r = [round.(Int,x[1:2]) for x in points]
     
+    # Initialize the vector of grouped points
     points3 = Vector{Vector{Vector{Int}}}(undef,0)
     j = 1 
     val = 2
     
+    # Group the points by their distance from the origin
     for i in 1:length(points)
         if points[i][3] >= val
             append!(points3,[points_r[j:i-1]])
@@ -53,34 +102,80 @@ function lattice_points(r::Int)
     return points3
 end
 
+
+
 """
-Calculates the number of pixels == 1 in a binary image. 
+    occupied_points(img)
+
+Calculates the proportion of occupied points in a given binary image `img`.
+
+The function sums up all the pixel values in the image and divides by the total number of pixels. 
+This gives the proportion of occupied points, assuming that non-zero pixel values represent occupied points.
+
+# Arguments
+- `img`: A 2D array representing the image. Non-zero values are considered as occupied points.
+
+# Returns
+- A float representing the proportion of occupied points in the image.
+
 """
 function occupied_points(img)
-    return sum(img)/(size(img)[1]*size(img)[2])
+    # Calculate the total number of pixels in the image
+    total_pixels = size(img)[1]*size(img)[2]
+
+    # Calculate the sum of all pixel values
+    total_value = sum(img)
+
+    # Calculate and return the proportion of occupied points
+    return total_value / total_pixels
 end
 
 
 """
+    approx_radi_colo(img)
+
 Calculates the approximate diameter of a colony by summing up all the pixel values and taking the square root of the sum.
 
-"""    
+This function assumes that the pixel values represent the area of the colony. The diameter is then approximated using the formula for the diameter of a circle given its area.
+
+# Arguments
+- `img`: A 2D array representing the image. The pixel values are assumed to represent the area of the colony.
+
+# Returns
+- A float representing the approximate diameter of the colony.
+
+"""
 function approx_radi_colo(img)
     return sum(img)^(1/2)
 end
     
 
+
 """
-Creates a binary image kernel with a given radius. The kernel can be either a circle or a square. 
+    create_kernel(rad::Int;  geometry::String = "circle")
+
+Creates a binary image kernel with a given radius. The kernel can be either a circle or a square.
+
+# Arguments
+- `rad::Int`: The radius of the kernel.
+- `geometry::String`: The shape of the kernel. Can be either "circle" or "square". Defaults to "circle".
+
+# Returns
+- `kernel`: A 2D array representing the kernel.
+
 """
-function create_kernel(rad;  geometry::String = "circle")
+function create_kernel(rad::Int;  geometry::String = "circle")
+    # Initialize the kernel with zeros
     kernel = zeros( 2*rad + 1, 2*rad + 1 )
+
     if geometry == "circle"
+        # If the geometry is a circle, set the values inside the circle to 1
         for x in 1:2*rad+1, y in 1:2*rad+1
             dist = ( y - rad + 1 )^2 + ( x - rad + 1 )^2
-            kernel[ y, x ] = ( rad^2 < dist )
+            kernel[ y, x ] = ( rad^2 >= dist )
         end
     elseif geometry == "square"
+        # If the geometry is a square, set all values to 1
         kernel .= 1
     end
     
@@ -89,29 +184,59 @@ end
 
 
 """
-12 Creates a binary image with same size as input image. The binary image is a circle with a given center. The circle is 
+    build_circle(center::Vector{Int}, img, points::Vector{Vector{Vector{Int}}}; threshold = 0.8::Float64)
+
+Creates a binary image with the same size as the input image. The binary image is a circle with a given center. 
+The circle is built by iterating over a set of points and setting the corresponding pixel in the binary image to 1 if the point is within the circle.
+The occupation in the outermost circle band is calculated in each iteration and stored in the occupation vector. 
+The function stops building the circle when the mean of the occupation vector is less than a given threshold.
+
+# Arguments
+- `center::Vector{Int}`: The center of the circle.
+- `img`: The input image.
+- `points::Vector{Vector{Vector{Int}}}`: A set of points used to build the circle.
+- `threshold::Float64`: The threshold for the mean of the occupation vector. Defaults to 0.8.
+
+# Returns
+- `circle_kernel`: A binary image representing the circle.
+
 """
-function build_circle(center, img, points;threshold = 0.8)
+function build_circle(center::Vector{Int}, img, points::Vector{Vector{Vector{Int}}}; threshold = 0.8::Float64)
+    # Initialize the binary image
     circle_kernel = zeros(Int, size(img))
     r = 1
+
+    # Iterate until the radius is less than the minimum size of the image
     while r < minimum(size(img))
+        # Initialize the occupation vector
         occupation_vec = zeros(Int,length(points[r]))
+
+        # Iterate over the points
         for (i,point) in enumerate(points[r])
+            # Calculate the coordinates of the point in the image
             point_c = point .+ center
+
+            # Set the corresponding pixel in the binary image to 1
             circle_kernel[point_c...] = 1
+
+            # If the corresponding pixel in the input image is 1, set the corresponding element in the occupation vector to 1
             if img[point_c...] == 1
-                
                 occupation_vec[i] = 1
             end
         end
+
+        # Increase the radius
         r += 1
+
+        # If the radius is greater than 10 and the mean of the occupation vector is less than the threshold, stop building the circle
         if r > 10 && mean(occupation_vec) < threshold
             break
         end
     end
+
+    # Return the binary image
     return circle_kernel 
 end
-
 
 
 
@@ -336,24 +461,38 @@ end
 
 
 
-""" 
-Generates vectors of x and y coordinates that span vectors ranging from 0 to 2π
-    Execute the following code to understand how this function works.
-```
-    using CairoMakie
-    number_vecs = 20
-    y,x = generate_dir_vec(20,0.1)
-    yy = zeros(number_vecs)
-    arrows(yy,yy, y, x)
+"""
+    generate_dir_vec(number_fingers, rand_dist)
+
+Generates vectors of x and y coordinates that span vectors ranging from 0 to 2π.
+
+# Arguments
+- `number_fingers`: The number of vectors to generate.
+- `rand_dist`: The random distance to add to the vectors.
+
+# Returns
+- `dir`: A vector of vectors, each containing the y and x coordinates of a vector.
+
+# Example
+```julia
+using CairoMakie
+number_vecs = 20
+y,x = generate_dir_vec(20,0.1)
+yy = zeros(number_vecs)
+arrows(yy,yy, y, x)
 ```
 """
 function generate_dir_vec(number_fingers, rand_dist)
+    # Generate the angles for the vectors vectus
     vectus = 2π/number_fingers.*[1:number_fingers...]+ rand(number_fingers) *rand_dist
+    # Calculate the y and x coordinates of the vectors
     y = sin.(vectus)
     x = cos.(vectus)
+
+    # Combine the y and x coordinates into a vector of vectors
     dir = [[y[i],x[i]] for i in 1:length(y)]
-    return dir
-end
+
+return dir
     
 
 """
@@ -533,14 +672,41 @@ function pair_cor_metric3(img, center; samples = 10000, steps = 360,counter_whil
     return angle_vec
 end
 
+
+"""
+    res_scaling(img_int_vec; factor = 3, plots = 1)
+
+Scales the resolution of a plot based on a given factor.
+The function counts the number of images in the given image_vec and and scales the resolution 
+of plot containg all these images accordingly.
+
+# Arguments
+- `img_int_vec`: A vector of images.
+- `factor`: The scaling factor. Defaults to 3.
+- `plots`: The number of plots per images. Defaults to 1.
+
+# Returns
+- A tuple containing the scaled width and height of the image.
+
+"""
 function res_scaling(img_int_vec; factor = 3, plots = 1)
+    # Initialize the counter
     c = 0
+
+    # Iterate over the images
     for i in img_int_vec
+        # Iterate over the slices in the image
         for j in 1:size(i,3)
+            # Increment the counter
             c += 1
         end
     end
-    return round(Int64,factor *1000)*plots,round(Int64,factor*200*(c÷5+((c%5 == 0) ? 0 : 1)))
+
+    # Calculate the scaled width and height of the image
+    width = round(Int64, factor * 1000) * plots
+    height = round(Int64, factor * 200 * (c ÷ 5 + ((c % 5 == 0) ? 0 : 1)))
+
+    return width, height
 end
 
 

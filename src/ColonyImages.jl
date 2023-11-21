@@ -1,6 +1,7 @@
 module ColonyImages
 
 using Images, FFTW 
+using Statistics
 
 export conv, 
         b_w,
@@ -8,7 +9,9 @@ export conv,
         lattice_points,
         centroid,
         approx_radi_colo,
-        create_kernel
+        create_kernel,
+        build_circle,
+        res_scaling
 
 include("image_functions.jl")
 
