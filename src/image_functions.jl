@@ -1,5 +1,5 @@
 """
-    centroid(img)
+    centroid(img::Union{Matrix{<:Real}, BitMatrix})
 
 Calculates the centroid of a given image `img`.
 
@@ -7,13 +7,13 @@ The centroid is calculated as the average of the x and y coordinates of all non-
 weighted by their intensity. The coordinates are then rounded to the nearest integer.
 
 # Arguments
-- `img`: A 2D array representing the image. Non-zero values are considered as part of the object to find the centroid of.
+- `img::Union{Matrix{<:Real}, BitMatrix}`: A 2D array representing the image. Non-zero values are considered as part of the object to find the centroid of.
 
 # Returns
 - `centroid_norm::Vector{Int64}`: A vector containing the x and y coordinates of the centroid.
 
 """
-function centroid(img)
+function centroid(img::Union{Matrix{<:Real}, BitMatrix})
     # Get the size of the image
     Y,X = size(img)
 
@@ -105,7 +105,7 @@ end
 
 
 """
-    occupied_points(img)
+    occupied_points(img::Union{Matrix{<:Real}, BitMatrix})
 
 Calculates the proportion of occupied points in a given binary image `img`.
 
@@ -113,13 +113,13 @@ The function sums up all the pixel values in the image and divides by the total 
 This gives the proportion of occupied points, assuming that non-zero pixel values represent occupied points.
 
 # Arguments
-- `img`: A 2D array representing the image. Non-zero values are considered as occupied points.
+- `img::Union{Matrix{<:Real}, BitMatrix}`: A 2D array representing the image. Non-zero values are considered as occupied points.
 
 # Returns
 - A float representing the proportion of occupied points in the image.
 
 """
-function occupied_points(img)
+function occupied_points(img::Union{Matrix{<:Real}, BitMatrix})
     # Calculate the total number of pixels in the image
     total_pixels = size(img)[1]*size(img)[2]
 
@@ -132,20 +132,20 @@ end
 
 
 """
-    approx_radi_colo(img)
+    approx_radi_colo(img::Union{Matrix{<:Real}, BitMatrix})
 
 Calculates the approximate diameter of a colony by summing up all the pixel values and taking the square root of the sum.
 
 This function assumes that the pixel values represent the area of the colony. The diameter is then approximated using the formula for the diameter of a circle given its area.
 
 # Arguments
-- `img`: A 2D array representing the image. The pixel values are assumed to represent the area of the colony.
+- `img::Union{Matrix{<:Real}, BitMatrix}`: A 2D array representing the image. The pixel values are assumed to represent the area of the colony.
 
 # Returns
 - A float representing the approximate diameter of the colony.
 
 """
-function approx_radi_colo(img)
+function approx_radi_colo(img::Union{Matrix{<:Real}, BitMatrix})
     return sum(img)^(1/2)
 end
     
@@ -184,7 +184,7 @@ end
 
 
 """
-    build_circle(center::Vector{Int}, img, points::Vector{Vector{Vector{Int}}}; threshold = 0.8::Float64)
+    build_circle(center::Vector{Int}, img::Union{Matrix{<:Real}, BitMatrix}, points::Vector{Vector{Vector{Int}}}; threshold = 0.8::Float64)
 
 Creates a binary image with the same size as the input image. The binary image is a circle with a given center. 
 The circle is built by iterating over a set of points and setting the corresponding pixel in the binary image to 1 if the point is within the circle.
@@ -193,7 +193,7 @@ The function stops building the circle when the mean of the occupation vector is
 
 # Arguments
 - `center::Vector{Int}`: The center of the circle.
-- `img`: The input image.
+- `img::Union{Matrix{<:Real}, BitMatrix}`: The input image.
 - `points::Vector{Vector{Vector{Int}}}`: A set of points used to build the circle.
 - `threshold::Float64`: The threshold for the mean of the occupation vector. Defaults to 0.8.
 
@@ -201,7 +201,7 @@ The function stops building the circle when the mean of the occupation vector is
 - `circle_kernel`: A binary image representing the circle.
 
 """
-function build_circle(center::Vector{Int}, img, points::Vector{Vector{Vector{Int}}}; threshold = 0.8::Float64)
+function build_circle(center::Vector{Int}, img::Union{Matrix{<:Real}, BitMatrix}, points::Vector{Vector{Vector{Int}}}; threshold = 0.8::Float64)
     # Initialize the binary image
     circle_kernel = zeros(Int, size(img))
     r = 1
@@ -241,57 +241,129 @@ end
 
 
 
-function build_artifical_colony!(center, img, radius, points)
+"""
+    build_artifical_colony!(center::Vector{Int}, img::Union{Matrix{<:Real}, BitMatrix}, radius::Int, points::Vector{Vector{Vector{Int}}})
+
+This function constructs an artificial spherical colony within a given image. The colony is represented as a circle with a specified center and radius. 
+The function directly modifies the input image.
+
+# Arguments
+- `center::Vector{Int}`: A vector representing the center coordinates of the colony.
+- `img`: The input image where the colony will be built.
+- `radius::Int`: The radius of the colony.
+- `points::Vector{Vector{Vector{Int}}}`: A nested vector containing the points used to construct the colony.
+
+# Returns
+- The image with the built colony.
+
+"""
+function build_artifical_colony!(center::Vector{Int}, img::Union{Matrix{<:Real}, BitMatrix}, radius::Int, points::Vector{Vector{Vector{Int}}})
+    # Initialize the radius
     r = 0
+
+    # Loop until the radius is less than or equal to the specified radius
     while r <= radius
+        # If the radius is 0, set the pixel at the center to 1
         if r == 0
             img[center...] = 1
         else
+            # If the radius is not 0, iterate over the points at the current radius
             for (i,point) in enumerate(points[r])
-                point_c = point .+center
+                # Calculate the actual coordinates of the point in the image
+                point_c = point .+ center
+
+                # Set the pixel at the calculated coordinates to 1
                 img[point_c...] = 1
             end
         end
+
+        # Increment the radius
         r += 1
     end
+
+    # Return the modified image
     return img
 end
 
-function expand_colony_circular!(img,points,center,pixels_to_add)
+"""
+    expand_colony_circular!(img::Union{Matrix{<:Real}, BitMatrix}, points::Vector{Vector{Vector{Int}}}, center::Vector{Int}, pixels_to_add::Int)
+
+This function expands a colony in a circular pattern within an image. The expansion starts from the center of the colony and proceeds outward. 
+The function directly modifies the input image.
+
+# Arguments
+- `img`: The input image where the colony will be expanded.
+- `points::Vector{Vector{Vector{Int}}}`: A nested vector containing the points used to expand the colony.
+- `center::Vector{Int}`: A vector representing the center coordinates of the colony.
+- `pixels_to_add::Int`: The number of pixels to add to the colony.
+
+"""
+function expand_colony_circular!(img::Union{Matrix{<:Real}, BitMatrix}, points::Vector{Vector{Vector{Int}}}, center::Vector{Int}, pixels_to_add::Int)
+    # Initialize the pixel count
     pix_count = 0
-    for r in 1:(round(Int,maximum(size(img))))
-        for (i,point) in enumerate(points[r])
-            point_c = point .+center
-            #if pixel is not black yet, make it black
+
+    # Loop over the radius from 1 to the minimum dimension of the image
+    for r in 1:(round(Int, minimum(size(img))))
+        # For each radius, iterate over the points
+        for (i, point) in enumerate(points[r])
+            # Calculate the actual coordinates of the point in the image
+            point_c = point .+ center
+
+            # If the pixel at the calculated coordinates is not black yet, make it black
             if img[point_c...] == 0
                 img[point_c...] = 1
-                #println(pix_count)
                 pix_count += 1
             end
+
+            # If the pixel count exceeds the number of pixels to add, exit the loop
             if pix_count > pixels_to_add
                 @goto escape
             end
         end
     end
+
     @label escape
 end
 
-function expand_colony_radom!(img,pixels_to_add)
+"""
+    expand_colony_radom!(img::Union{Matrix{<:Real}, BitMatrix}, pixels_to_add::Int)
+
+This function expands a colony in a random pattern within an image. The expansion is performed by adding pixels to the border of the colony. 
+The function directly modifies the input image.
+
+# Arguments
+- `img`: The input image where the colony will be expanded.
+- `pixels_to_add::Int`: The number of pixels to add to the colony.
+
+"""
+function expand_colony_radom!(img::Union{Matrix{<:Real}, BitMatrix}, pixels_to_add::Int)
+    # Initialize the pixel count
     pix_count = 0
+
+    # Find the border points of the colony and shuffle them
     border_points = shuffle!(findall((distance_transform(feature_transform(img)).== 1)))
     shuffle_counter = 0
+
+    # Loop until the desired number of pixels have been added
     while pix_count < pixels_to_add
+        # For each point in the shuffled border points
         for point in border_points
+            # If the pixel at the point is not black yet, make it black
             if img[point] == 0
                 img[point] = 1
                 pix_count += 1
             end
+
+            # Increment the shuffle counter
             shuffle_counter += 1
             
+            # If the shuffle counter reaches 10% of the length of the border points, break the loop
             if shuffle_counter >= length(border_points)*0.1
                 break
             end            
         end
+
+        # Find the new border points of the colony and shuffle them
         border_points = shuffle!(findall((distance_transform(feature_transform(img)).== 1)))
         shuffle_counter = 0 
     end
@@ -497,28 +569,50 @@ end
     
 
 """
-Creates a Convolution of an Image with a given kernel. The input image is a 2D Int or Float array. 
-The kernel is a smaller 2D Int or Float array.
-The output is a 2D FLoat64 array with the same size the input image. 
+    conv(img::Union{Matrix{<:Real}, BitMatrix}, kernel::Union{Matrix{<:Real}, BitMatrix})
+
+Performs a convolution operation on an image using a given kernel. The input image and kernel are 2D arrays of Int or Float or Bool. 
+The function returns a 2D Float64 array of the same size as the input image.
+
+# Arguments
+- `img::Union{Matrix{<:Real}, BitMatrix}`: The input image, a 2D array of Int, Float or Bool.
+- `kernel::Union{Matrix{<:Real}, BitMatrix}`: The kernel used for the convolution, a smaller 2D array of Int,Float or Bool.
+
+# Returns
+- A 2D Float64 array representing the convolved image.
+
 """
-function conv( img, kernel )
+function conv(img::Union{Matrix{<:Real}, BitMatrix}, kernel::Union{Matrix{<:Real}, BitMatrix})
+    # Calculate the size of the convolution
     csize = size(img) .+ size(kernel) .- 1
-    padimg = zeros( ComplexF32, csize )
-    padkernel = zeros( ComplexF32, csize )
-    
-    padimg[ 1:size(img,1), 1:size(img,2) ] .= img
-    padkernel[ 1:size(kernel,1), 1:size(kernel,2)  ] .= kernel
-    
-    fft!( padimg )
-    fft!( padkernel) 
+
+    # Initialize padded versions of the image and kernel
+    padimg = zeros(ComplexF32, csize)
+    padkernel = zeros(ComplexF32, csize)
+
+    # Copy the image and kernel into the padded versions
+    padimg[1:size(img,1), 1:size(img,2)] .= img
+    padkernel[1:size(kernel,1), 1:size(kernel,2)] .= kernel
+
+    # Perform the Fast Fourier Transform on the padded image and kernel
+    fft!(padimg)
+    fft!(padkernel)
+
+    # Multiply the transformed image and kernel
     padimg .*= padkernel
-    ifft!( padimg )
-    
-    output = real.( padimg )
-    
-    off = div.( size(kernel), 2 )
+
+    # Perform the inverse Fast Fourier Transform on the result
+    ifft!(padimg)
+
+    # Extract the real part of the result
+    output = real.(padimg)
+
+    # Calculate the offset for the kernel
+    off = div.(size(kernel), 2)
+
+    # Extract the convolved image from the output
     h, w = size(img)
-    return output[ 1+off[1]:h+off[1], 1+off[2]:w+off[2] ]
+    return output[1+off[1]:h+off[1], 1+off[2]:w+off[2]]
 end
 
 b_w_n(img) = (round.(Int64,Float64.(Gray.(img))).-1).*-1
@@ -526,48 +620,100 @@ b_w_i(img )= round.(Int64,Float64.(Gray.(img)))
 
 
 """
-Converts an grayscale colony image into a binary image/BitArray. Checks if more than half of image is black and inverts it in that case
-As the colony is always much smaller that the background, this ensures that in the output image the pixels inside the
-colony are always set to 1 and the background pixels to 0, no matter the invertion status of the input image . 
+    b_w(img)
+
+Converts a grayscale colony image into a binary image/BitArray. If more than half of the image is black, it inverts the image. 
+This ensures that in the output image, the pixels inside the colony are always set to 1 and the background pixels to 0, 
+regardless of the inversion status of the input image.
+
+# Arguments
+- `img`: The input image.
+
+# Returns
+- A binary image where the colony pixels are set to 1 and the background pixels are set to 0.
+
 """
 function b_w(img)
+    # Convert the image to binary
     img = b_w_i(img)
+
+    # If more than half of the image is black, invert the image
     if sum(img) >= prod(size(img))*0.5
         img = (img .-1) .*-1 
     end
+
+    # Convert the image to a BitArray and return it
     return Bool.(img)
 end
 
+
 """
-Filles holes in 
+    fill_holes(img, size_holes::Real)
+
+Fills holes in a binary image. The size of the holes to be filled is determined by the `size_holes` parameter.
+
+# Arguments
+- `img: The input binary image.
+- `size_holes::Real`: The relative size of the holes to be filled. This is a fraction of the total number of pixels in the image.
+
+# Returns
+- A binary image with the holes filled.
+
 """
-function fill_holes(img,size_holes)
+function fill_holes(img, size_holes::Real)
+    # Calculate the absolute size of the holes to be filled
     size_absolut = size(img)[1]*size(img)[2]*size_holes 
-    
+
+    # Invert the image, fill the holes, and then invert the image again
     return .!(imfill(.!(Bool.(img)),(0.1,size_absolut)))
 end
 
 
-"""Helper functions for angular metric, takes an angle in radiants as input and a number of circular sectors into which a unit circle is divided. The output is the number of circular sector to which the angle corresponds. E.g angle = 0.0 ,steps = 360 ;output = 1 which is first circular sector on the unit circle, EG.  angle = (2pi -0.01), steps = 360, output = 360, last circular sector ranging from 2pi -0.01), steps = 360, output = 360, last circular sector ranging from [2pi/steps *(steps-1) - 2pi)
 """
-function rad2deg_discrete(ϕ; steps=360)
+    rad2deg_discrete(ϕ::AbstractFloat; steps::Int =360)
+
+Converts an angle in radians to a discrete angle in degrees. The output is the number of a circular sector on a unit circle divided into a given number of sectors. 
+For example, if the angle is 0.0 and the number of steps is 360, the output is 1, which corresponds to the first circular sector on the unit circle. 
+If the angle is (2pi - 0.01) and the number of steps is 360, the output is 360, which corresponds to the last circular sector on the unit circle.
+
+# Arguments
+- `ϕ::AbstractFloat`: The input angle in radians.
+- `steps::Int`: The number of circular sectors into which the unit circle is divided. Default is 360.
+
+# Returns
+- The number of the circular sector to which the angle corresponds.
+
+"""
+function rad2deg_discrete(ϕ::AbstractFloat; steps::Int =360)
+    # Calculate the size of each step in degrees
     stepsize = 360/steps 
-    ϕ_a = rad2deg(ϕ) +180
+
+    # Convert the angle to degrees and shift it by 180 degrees
+    ϕ_a = rad2deg(ϕ) + 180
+
+    # If the angle is 360 or more, reset it to 0
     if ϕ_a >= 360
         ϕ_a = 0.0
     end
-    
-    ϕ_a_d = round(Int,(ϕ_a-0.5)/stepsize)+1
+
+    # Calculate the discrete angle
+    ϕ_a_d = round(Int, (ϕ_a - 0.5) / stepsize) + 1
+
+    # If the discrete angle is less than 1, set it to 1
     if ϕ_a_d < 1
-        ϕ_a_d =1 
+        ϕ_a_d = 1 
     end
+
+    # If the discrete angle is greater than or equal to the number of steps, set it to 1
     if ϕ_a_d >= steps
         ϕ_a_d = 1
     end
-        
-    
+
+    # Return the discrete angle
     return ϕ_a_d
 end
+
+
 
 function angular_metric_shit(img, center; steps = 360)
     angle_vec = zeros(Int64, steps)
@@ -585,20 +731,51 @@ function angular_metric_shit(img, center; steps = 360)
     return angle_vec
 end
 
-function angular_metric(img, center; steps = 360)
+"""
+    angular_metric(img::Union{Matrix{<:Real}, BitMatrix}, center::Vector{Int}; steps::Int = 360)
+
+Calculates an angular metric for a given image. The metric is a vector where each element represents the number of pixels in a certain angular sector of the image. 
+The sectors are determined by dividing a circle centered at a given point into a certain number of equal parts.
+
+# Arguments
+- `img::Union{Matrix{<:Real}, BitMatrix}`: The input image.
+- `center::Vector{Int}`: The center of the circle.
+- `steps::Int`: The number of sectors into which the circle is divided. Default is 360.
+
+# Returns
+- A vector where each element represents the number of pixels in a certain angular sector of the image.
+
+"""
+function angular_metric(img::Union{Matrix{<:Real}, BitMatrix}, center::Vector{Int}; steps::Int = 360)
+    # Initialize the vector for the angular metric
     angle_vec = zeros(Int64, steps)
+
+    # Calculate the size of each step in radians
     stepsize = 2π/steps 
+
+    # For each pixel in the image
     for y in 1:size(img)[1], x in 1: size(img)[2]
+        # If the pixel is not zero
         if img[y,x] != 0
+            # Calculate the vector from the center to the pixel
             vec = [y,x] .- center
-            ϕ = atan(vec...)+π
-            step_index = minimum([round(Int,ϕ/stepsize), steps-1])
-            angle_vec[step_index+1] += 1
+
+            # Calculate the angle of the vector
+            ϕ = atan(vec...) + π
+
+            # Determine the sector to which the angle belongs
+            step_index = minimum([round(Int, ϕ / stepsize), steps - 1])
+
+            # Increment the count for the sector
+            angle_vec[step_index + 1] += 1
         end
     end
-    #last and first circular segment are buggy due to discretions artefacts, mean of both of them
-    mean_angle = round(Int,mean([angle_vec[1], angle_vec[end]]))
-    angle_vec[1], angle_vec[end] = mean_angle,mean_angle
+
+    # The first and last sectors may be inaccurate due to discretization artifacts, so take the mean of both
+    mean_angle = round(Int, mean([angle_vec[1], angle_vec[end]]))
+    angle_vec[1], angle_vec[end] = mean_angle, mean_angle
+
+    # Return the angular metric
     return angle_vec
 end
 
@@ -647,29 +824,63 @@ function pair_cor_metric2(img, center; samples = 10000, steps = 360)
     return angle_vec
 end
 
-function pair_cor_metric3(img, center; samples = 10000, steps = 360,counter_while = 0 )
+"""
+    pair_cor_metric3(img::Union{Matrix{<:Real}, BitMatrix}, center::Vector{Int}; samples::Int = 10000, steps::Int = 360)
+
+Calculates a pair correlation metric for a given image. The metric is a vector where each element represents the number of pairs of pixels that have a certain relative angle. 
+The angles are determined by dividing a half-circle into a certain number of equal parts.
+
+# Arguments
+- `img::Union{Matrix{<:Real}, BitMatrix}`: The input image.
+- `center::Vector{Int}`: The reference point for calculating the relative angles.
+- `samples::Int`: The number of pairs of pixels to sample. Default is 10000.
+- `steps::Int`: The number of sectors into which the half-circle is divided. Default is 360.
+
+# Returns
+- A vector where each element represents the number of pairs of pixels that have a certain relative angle.
+
+"""
+function pair_cor_metric3(img::Union{Matrix{<:Real}, BitMatrix}, center::Vector{Int}; samples::Int = 10000, steps::Int = 360,)
+    # Initialize the vector for the pair correlation metric
     angle_vec = zeros(Int64, steps)
+
+    # Calculate the size of each step in radians
     stepsize = π/steps
+
+    # Find the indices of the non-zero pixels
     indizies = Tuple.(findall(x-> x != 0 ,img))
-    angles = Float64[]
-    counter_while = 0
+
+    # For each sample
     for i in 1:samples
+        # Randomly select two non-zero pixels
         v1, v2  = sample(indizies, 2, replace = false)
-        # ensure that center of the colony is not part of the sampled pair of points 
+
+        # If the reference point is one of the pixels, select two new pixels
         while Tuple(center) in [v1,v2]
             v1, v2  = sample(indizies, 2, replace = false)
-            counter_while += 1
         end
+
+        # Calculate the vectors from the reference point to the pixels
         v1_v = v1 .- center 
         v2_v = v2 .- center
+
+        # Calculate the cosine of the angle between the vectors
         x = dot(v1_v,v2_v)/(norm(v1_v)*norm(v2_v))
+
+        # Calculate the angle between the vectors
         angle = acos(x >1.0 ? 1.0 : x < -1.0 ? -1.0 : x)
+
+        # Determine the sector to which the angle belongs
         step_index = trunc(Int64,angle/stepsize)
-        # sometimes step index can be bigger than 359 for rounding reasons, if so 359 is assigned 
+
+        # If the step index is 360 due to rounding errors, set it to 359
         step_index_final = (step_index == 360 ? 359 : step_index)
+
+        # Increment the count for the sector
         angle_vec[step_index_final+1] += 1
-       
     end
+
+    # Return the pair correlation metric
     return angle_vec
 end
 
@@ -716,7 +927,7 @@ replace_nan_1(x) = ismissing(x) || (x isa Number && isnan(x)) ? 1 : x
 
 replace_nan(x) = ismissing(x) || (x isa Number && isnan(x)) ? 0 : x
 
-function filter_fourier_alpha(vec; a = 5)
+function filter_fourier_alpha(vec::Vector{<:Real}; a = 5)
     vec2 = deepcopy(vec)
     for i in 1:length(vec2)
         if i > a
