@@ -927,43 +927,104 @@ replace_nan_1(x) = ismissing(x) || (x isa Number && isnan(x)) ? 1 : x
 
 replace_nan(x) = ismissing(x) || (x isa Number && isnan(x)) ? 0 : x
 
-function filter_fourier_alpha(vec::Vector{<:Real}; a = 5)
+
+"""
+    filter_fourier_alpha(vec; a = 5)
+
+Filters a vector by setting all elements after the `a`-th element to zero. This function is useful for filtering the results of a Fourier transform, where the elements of the vector represent the amplitudes of the frequencies, and the index of the element represents the frequency. By setting all elements after the `a`-th element to zero, we effectively remove all frequencies higher than `a`.
+
+# Arguments
+- `vec::Vector{<:Real}`: The input vector.
+- `a::Int`: The cutoff frequency. All frequencies higher than `a` are removed. Default is 5.
+
+# Returns
+- A new vector where all elements after the `a`-th element are zero.
+
+"""
+function filter_fourier_alpha(vec::Vector{<:Real}; a::Int = 5)
+    # Create a deep copy of the input vector
     vec2 = deepcopy(vec)
+
+    # For each element in the vector
     for i in 1:length(vec2)
+        # If the index of the element is greater than the cutoff frequency
         if i > a
+            # Set the element to zero
             vec2[i] = 0.0
         end
     end
+
+    # Return the filtered vector
     return vec2
 end
-    
 
-function filter_fourier_beta(vec; b = 0.5)
+
+"""
+    filter_fourier_beta(vec::Vector{<:Real}; b::AbstractFloat = 0.5)
+
+Filters a vector by setting all elements whose absolute value is less than or equal to `b` times the maximum absolute value of the elements to zero. This function is useful for filtering the results of a Fourier transform, where the elements of the vector represent the amplitudes of the frequencies. By setting all elements whose amplitude is less than or equal to `b` times the maximum amplitude to zero, we effectively remove all frequencies with low amplitudes.
+
+# Arguments
+- `vec::Vector{<:Real}`: The input vector.
+- `b::AbstractFloat`: The threshold for the amplitude. All frequencies with amplitudes less than or equal to `b` times the maximum amplitude are removed. Default is 0.5.
+
+# Returns
+- A new vector where all elements whose absolute value is less than or equal to `b` times the maximum absolute value are zero.
+
+"""
+function filter_fourier_beta(vec::Vector{<:Real}; b::AbstractFloat = 0.5)
+    # Calculate the maximum absolute value of the elements
     max = maximum(abs.(vec))
+
+    # Create a deep copy of the input vector
     vec2 = deepcopy(vec)
+
+    # For each element in the vector
     for i in 1:length(vec2)
+        # If the absolute value of the element is less than or equal to `b` times the maximum absolute value
         if abs(vec2[i]) <= max*b
+            # Set the element to zero
             vec2[i] = 0.0
-    
         end 
     end
+
+    # Return the filtered vector
     return vec2
 end
 
-function find_freq(vec; ignore_latter_half = true )
+"""
+    find_freq(vec::Vector{<:Real}; ignore_latter_half = true )
+
+Finds the frequencies in a vector that have non-zero amplitudes. This function is useful for analyzing the results of a Fourier transform, where the elements of the vector represent the amplitudes of the frequencies, and the index of the element represents the frequency.
+
+# Arguments
+- `vec::Vector{<:Real}`: The input vector.
+- `ignore_latter_half::Bool`: If true, the function only considers the first half of the vector. This is useful when the input vector is the result of a Fourier transform, where the second half of the vector contains the same information as the first half but in reverse order. Default is true.
+
+# Returns
+- A vector of the frequencies that have non-zero amplitudes.
+
+"""
+function find_freq(vec::Vector{<:Real}; ignore_latter_half = true )
+    # Initialize the vector for the frequencies
     freq_vec = Int64[]
+
+    # Determine the length of the loop
     len_lopp = length(vec)
     if ignore_latter_half
         len_lopp = len_lopp ÷2
     end
     
-    ### change to 2 iteration, not sure if sensefull 
-    
+    # For each element in the vector
     for i in 2:len_lopp
+        # If the amplitude is not zero
         if vec[i] != 0.0
+            # Add the frequency to the vector
             push!(freq_vec,i)
         end
     end
+
+    # Return the vector of frequencies
     return freq_vec
 end
         
@@ -982,35 +1043,95 @@ function filter_fourier_beta2(vec; b = 0.5)
 end
 
 
-"Finds the local maxima inside a 1D signal, in areas where the 
-signal exceed an its mean value by a given factor"
-function find_peaks(signal; threshold = 1.0)
+"""
+    find_peaks(signal::Vector{<:Real}; threshold::AbstractFloat = 1.0)
+
+Finds the local maxima inside a 1D signal, in areas where the signal exceeds its mean value by a given factor. 
+
+# Arguments
+- `signal::Vector{<:Real}`: The input 1D signal.
+- `threshold::AbstractFloat`: The factor by which the signal needs to exceed its mean value to be considered a peak. Default is 1.0.
+
+# Returns
+- `position_peaks`: A vector of the positions of the peaks in the signal.
+- `nr_peaks`: The number of peaks found in the signal.
+
+"""
+function find_peaks(signal::Vector{<:Real}; threshold::AbstractFloat = 1.0)
+    # Calculate the mean of the signal multiplied by the threshold
     mean_s = mean(signal)*threshold
+
+    # Initialize the number of peaks and the inside_peak flag
     nr_peaks = 0 
     inside_peak = 0
+
+    # Initialize the vectors for the positions of the peaks and the current peak
     position_peaks = typeof(signal)(undef,0)
     current_peak = typeof(signal)(undef,0)
+
+    # For each element in the signal
     for (i,x) in enumerate(signal )
+        # If the element is greater than the mean
         if x > mean_s
+            # Set the inside_peak flag to 1 and add the index to the current_peak vector
             inside_peak = 1
             push!(current_peak, i)
+        # If the element is less than the mean and the inside_peak flag is 1
         elseif x < mean_s && inside_peak == 1
+            # Reset the inside_peak flag to 0
             inside_peak = 0
+
+            # Add the position of the maximum of the current peak to the position_peaks vector
             push!(position_peaks, findmax(signal[[current_peak...]])[2]+i-1-length(current_peak))
+
+            # Increment the number of peaks
             nr_peaks += 1
+
+            # Reset the current_peak vector
             current_peak = typeof(signal)(undef,0)
         end
     end
+
+    # Return the positions of the peaks and the number of peaks
     return position_peaks, nr_peaks
 end
 
 
-function expand_matrix(mat; annuli = 2 )
+
+""" expand_matrix(mat::Union{Matrix{<:Real}, BitMatrix}; annuli::Int = 2 )
+
+Expands a matrix by adding zero-filled columns to its outermost right column and rotating it 90 degrees counterclockwise.
+This process is repeated 4 times per annulus. The number of additional bands (annuli) added to the matrix is determined by the annuli parameter.
+
+Arguments
+mat::Union{Matrix{<:Real}, BitMatrix}: The input matrix.
+annuli::Int: The number of additional bands to be added to the matrix. Default is 2.
+Returns
+The expanded matrix.
+Examples
+```julia	
+mat = [1 2; 3 4]
+expand_matrix(mat, annuli = 1)
+4×4 Matrix{Int64}:
+ 0  0  0  0
+ 0  1  2  0
+ 0  3  4  0
+ 0  0  0  0
+```
+"""
+function expand_matrix(mat::Union{Matrix{<:Real}, BitMatrix}; annuli::Real = 2 )
+    # If annuli is approximately zero
     if annuli ≈ 0
+        # Return the matrix as is
         return mat
     else
+        # Add a column of zeros to the right of the matrix
         mat = hcat(mat, zeros(eltype(mat),size(mat)[1]))
+
+        # Rotate the matrix 90 degrees counterclockwise
         mat = rotr90(mat)
-    return expand_matrix(mat, annuli = annuli -0.25)
+
+        # Recursively call the function with annuli reduced by 0.25
+        return expand_matrix(mat, annuli = annuli -0.25)
     end
 end
