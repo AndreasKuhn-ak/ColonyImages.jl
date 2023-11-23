@@ -14,6 +14,7 @@ export conv,
         res_scaling
 
 include("image_functions.jl")
+include("artifical_colony_creation.jl")
 
 
 end
