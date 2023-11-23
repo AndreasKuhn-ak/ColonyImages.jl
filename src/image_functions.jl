@@ -241,16 +241,6 @@ end
 
 
 
-         
-
-
-
-
-
-
-
-
-
 """
     conv(img::Union{Matrix{<:Real}, BitMatrix}, kernel::Union{Matrix{<:Real}, BitMatrix})
 
