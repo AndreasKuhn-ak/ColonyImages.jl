@@ -43,12 +43,13 @@ The `artificial_colony_creation.jl` file contains functions for creating artific
 ### Usage
 Here is a basic example of how to use the expand_colony_radom_cov! function:
 
+```julia
 using ColonyImages
 
 img = zeros(100, 100)
 img[50:55, 50:55] .= 1
 expand_colony_radom_cov!(img, 100)
-
+```
 ### Documentation
 For more detailed information about the functions and their usage, please refer to the [documentation](https://andreaskuhn-ak.github.io/ColonyImages.jl/).
 
