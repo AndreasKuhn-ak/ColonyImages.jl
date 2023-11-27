@@ -1,7 +1,7 @@
 module ColonyImages
 
 using Images, FFTW 
-using Statistics
+using Statistics, StatsBase
 
 export conv, 
         b_w,
@@ -11,7 +11,9 @@ export conv,
         approx_radi_colo,
         create_kernel,
         build_circle,
-        res_scaling
+        res_scaling,
+        angular_metric,
+        pair_cor_metric3
 
 include("image_functions.jl")
 include("artifical_colony_creation.jl")

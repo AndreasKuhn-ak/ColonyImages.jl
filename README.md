@@ -34,7 +34,7 @@ angular_metric = angular_metric(img, center)
 
 This will return a vector where each element represents the number of pixels in a certain angular sector of the image. You can then use this vector to analyze the spatial distribution of the colony in the image.
 
-To help users understand how to use these functions, we have provided a Jupyter notebook titled "image_pipeline_tutorial_notebook.ipynb". This notebook walks through the process of analyzing some given test data using the functions in image_functions.jl. It provides a practical example of how these functions can be used to extract meaningful information from colony images. 
+To help users understand how to use these functions, we have provided a Jupyter notebook titled `image_pipeline_tutorial_notebook.ipynb`. This notebook walks through the process of analyzing some given test data using the functions in image_functions.jl. It provides a practical example of how these functions can be used to extract meaningful information from colony images. 
 
 ### Artificial Colony Creation
 
