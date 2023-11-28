@@ -1,12 +1,12 @@
 """
-    build_artifical_colony!(center::Vector{Int}, img::Union{Matrix{<:Real}, BitMatrix}, radius::Int, points::Vector{Vector{Vector{Int}}})
+    build_artifical_colony!(center::Vector{Int}, img::AbstractArray}, radius::Int, points::Vector{Vector{Vector{Int}}})
 
 This function constructs an artificial spherical colony within a given image. The colony is represented as a circle with a specified center and radius. 
 The function directly modifies the input image.
 
 # Arguments
 - `center::Vector{Int}`: A vector representing the center coordinates of the colony.
-- `img`: The input image where the colony will be built.
+- `img::AbstractArray`: The input image where the colony will be built.
 - `radius::Int`: The radius of the colony.
 - `points::Vector{Vector{Vector{Int}}}`: A nested vector containing the points used to construct the colony.
 
@@ -14,7 +14,7 @@ The function directly modifies the input image.
 - The image with the built colony.
 
 """
-function build_artifical_colony!(center::Vector{Int}, img::Union{Matrix{<:Real}, BitMatrix}, radius::Int, points::Vector{Vector{Vector{Int}}})
+function build_artifical_colony!(center::Vector{Int}, img::AbstractArray, radius::Int, points::Vector{Vector{Vector{Int}}})
     # Initialize the radius
     r = 0
 
@@ -45,19 +45,19 @@ end
 
 
 """
-    expand_colony_circular!(img::Union{Matrix{<:Real}, BitMatrix}, points::Vector{Vector{Vector{Int}}}, center::Vector{Int}, pixels_to_add::Int)
+    expand_colony_circular!(img::AbstractArray, points::Vector{Vector{Vector{Int}}}, center::Vector{Int}, pixels_to_add::Int)
 
 This function expands an artifical colony in a circular pattern within an image. The expansion starts from the center of the colony and proceeds outward. 
 The function directly modifies the input image.
 
 # Arguments
-- `img::Union{Matrix{<:Real}, BitMatrix}`: The input image where the colony will be expanded.
+- `img::AbstractArray`: The input image where the colony will be expanded.
 - `points::Vector{Vector{Vector{Int}}}`: A nested vector containing the points used to expand the colony.
 - `center::Vector{Int}`: A vector representing the center coordinates of the colony.
 - `pixels_to_add::Int`: The number of pixels to add to the colony.
 
 """
-function expand_colony_circular!(img::Union{Matrix{<:Real}, BitMatrix}, points::Vector{Vector{Vector{Int}}}, center::Vector{Int}, pixels_to_add::Int)
+function expand_colony_circular!(img::AbstractArray, points::Vector{Vector{Vector{Int}}}, center::Vector{Int}, pixels_to_add::Int)
     # Initialize the pixel count
     pix_count = 0
 
@@ -86,7 +86,7 @@ end
 
 
 """
-    expand_colony_radom_cov!(img::Union{Matrix{<:Real}, BitMatrix}, pixels_to_add::Int)
+    expand_colony_radom_cov!(img::AbstractArray, pixels_to_add::Int)
 
 Expand the colony in the image `img` by adding `pixels_to_add` pixels. The expansion is done randomly 
 at the border of the colony. The border is determined by convolving the image with a Laplacian kernel 
@@ -97,7 +97,7 @@ but slower for small images and fewer pixels to add. This is due to the fact tha
 calculated once for the whole image, whereas the distance transform in `expand_colony_radom` needs to be calculated for each iteration of the loop.
 
 # Arguments
-- `img::Union{Matrix{<:Real}, BitMatrix}`: A 2D array representing the image of the colony. The colony is represented by 1s and the background by 0s.
+- `img::AbstractArray`: A 2D array representing the image of the colony. The colony is represented by 1s and the background by 0s.
 - `pixels_to_add::Int`: The number of pixels to add to the colony.
 
 # Example
@@ -110,7 +110,7 @@ Compared to `expand_colony_radom!`, this function is faster for large images and
 but slower for small images and fewer pixels to add. This is due to the fact that the computational heavy convolution only needs to be 
     calculated once for the whole image, whereas the distance transform in `expand_colony_radom` needs to be calculated for each iteration of the loop.
 """
-function expand_colony_radom_cov!(img::Union{Matrix{<:Real}, BitMatrix},pixels_to_add::Int)
+function expand_colony_radom_cov!(img::AbstractArray,pixels_to_add::Int)
      # Initialize pixel count and Laplacian kernel 
     pix_count = 0 
     laplac_kernel = [0 1 0; 1 -4 1; 0 1 0]
@@ -148,20 +148,20 @@ end
 
 
 """
-    expand_colony_radom!(img::Union{Matrix{<:Real}, BitMatrix}, pixels_to_add::Int)
+    expand_colony_radom!(img::AbstractArray, pixels_to_add::Int)
 
 This function expands a colony in a random pattern within an image. The expansion is performed by adding pixels to the border of the colony. 
 The function directly modifies the input image. 
 
 # Arguments
-- `img::Union{Matrix{<:Real}, BitMatrix}`: The input image where the colony will be expanded.
+- `img::AbstractArray`: The input image where the colony will be expanded.
 - `pixels_to_add::Int`: The number of pixels to add to the colony.
 
 Compared to `expand_colony_radom_cov!`, this function is slower for large images and many pixels to add,
  but faster for small images and and fewer pixels to add .This is due to the fact that the computational heavy convolution only needs to be 
     calculated once for the whole image, whereas the distance transform in `expand_colony_radom` needs to be calculated for each iteration of the loop.
 """
-function expand_colony_radom!(img::Union{Matrix{<:Real}, BitMatrix}, pixels_to_add::Int)
+function expand_colony_radom!(img::AbstractArray, pixels_to_add::Int)
     # Initialize the pixel count
     pix_count = 0
 
@@ -197,7 +197,7 @@ end
 
 
 """
-    expand_colony_fractal_radom_cov!(img::Union{Matrix{<:Real}, BitMatrix}, pixels_to_add::Int; max_neigbours::Int, = 1 prob_neigbour::AbstractFloat = 0.3)
+    expand_colony_fractal_radom_cov!(img::AbstractArray, pixels_to_add::Int; max_neigbours::Int, = 1 prob_neigbour::AbstractFloat = 0.3)
 
 Expand the colony in the image `img` by adding `pixels_to_add` pixels. The expansion is done randomly 
 at the border of the colony, but it is more likely to expand to points that only have `max_neigbours` or less. 
@@ -205,7 +205,7 @@ The border is determined by convolving the image with a Laplacian kernel and fin
 is greater than 0.1. The function modifies the input image in-place.
 
 # Arguments
-- `img::Union{Matrix{<:Real}, BitMatrix}`: A 2D array of type Matrix with elements of any subtype of Real or a BitMatrix, representing the image of the colony. The colony is represented by 1s and the background by 0s.
+- `img::AbstractArray`: A 2D array of type Matrix with elements of any subtype of Real or a BitMatrix, representing the image of the colony. The colony is represented by 1s and the background by 0s.
 - `pixels_to_add::Int`: An integer representing the number of pixels to add to the colony.
 - `max_neigbours`: An integer representing the maximum number of neighbours a point can have to be considered for expansion. Default is 1.
 - `prob_neigbour::AbstractFloat`: A float representing the probability of expanding to a point with more than `max_neigbours`. Default is 0.3.
@@ -217,7 +217,7 @@ img[50:55, 50:55] .= 1
 expand_colony_fractal_radom_cov!(img, 100)
 ```
 """
-function expand_colony_fractal_radom_cov!(img::Union{Matrix{<:Real}, BitMatrix},pixels_to_add::Int; max_neigbours::Int = 1, prob_neigbour::AbstractFloat = 0.3)
+function expand_colony_fractal_radom_cov!(img::AbstractArray,pixels_to_add::Int; max_neigbours::Int = 1, prob_neigbour::AbstractFloat = 0.3)
     pix_count = 0
     laplac_kernel = [0 1 0; 1 -4 1; 0 1 0]
     # Convolve the image with the Laplacian kernel
@@ -266,7 +266,7 @@ end
 
 
 """
-    expand_colony_un_radom_cov!(img::Union{Matrix{<:Real}, BitMatrix}, pixels_to_add::Int, dir::Vector{Int}; still_spawn_rate::AbstractFloat = 0.5)
+    expand_colony_un_radom_cov!(img::AbstractArray, pixels_to_add::Int, dir::Vector{Int}; still_spawn_rate::AbstractFloat = 0.5)
 
 Expand the colony in the image `img` by adding `pixels_to_add` pixels. The expansion is done randomly 
 at the border of the colony, but it is more likely to expand in the direction specified by `dir`. 
@@ -274,7 +274,7 @@ The border is determined by convolving the image with a Laplacian kernel and fin
 is greater than 0.1. The function modifies the input image in-place.
 
 # Arguments
-- `img::Union{Matrix{<:Real}, BitMatrix}`: A 2D array representing the image of the colony. The colony is represented by 1s and the background by 0s.
+- `img::AbstractArray`: A 2D array representing the image of the colony. The colony is represented by 1s and the background by 0s.
 - `pixels_to_add::Int`: The number of pixels to add to the colony.
 - `dir::Vector{Int}`: A vector representing the preferred direction of expansion.
 - `still_spawn_rate::AbstractFloat`: A float representing the probability of expanding in a direction opposite to `dir`. Default is 0.5.
@@ -286,7 +286,7 @@ img[50:55, 50:55] .= 1
 expand_colony_un_radom_cov!(img, 100, [1, 0])
 ```
 """
-function expand_colony_un_radom_cov!(img::Union{Matrix{<:Real}, BitMatrix},pixels_to_add::Int,dir::Vector{Int}; still_spawn_rate::AbstractFloat = 0.5,  )
+function expand_colony_un_radom_cov!(img::AbstractArray,pixels_to_add::Int,dir::Vector{Int}; still_spawn_rate::AbstractFloat = 0.5,  )
     pix_count = 0
     laplac_kernel = [0 1 0; 1 -4 1; 0 1 0]
     cov_img = conv( img, laplac_kernel )
@@ -360,7 +360,7 @@ end
 
 
 """
-    expand_colony_finger_radom_cov!(img::Union{Matrix{<:Real}, BitMatrix}, pixels_to_add::Int, dir::Vector{Int}; dir_match_rate::AbstractFloat = 0.999, still_spawn_rate::AbstractFloat = 0.99, min_neigbour::Int = 2)
+    expand_colony_finger_radom_cov!(img::AbstractArray, pixels_to_add::Int, dir::Vector{Int}; dir_match_rate::AbstractFloat = 0.999, still_spawn_rate::AbstractFloat = 0.99, min_neigbour::Int = 2)
 
 Expand the colony in the image `img` by adding `pixels_to_add` pixels. The expansion is done randomly 
 at the border of the colony, but it is more likely to expand in the direction specified by `dir`. 
@@ -368,7 +368,7 @@ The border is determined by convolving the image with a Laplacian kernel and fin
 is greater than 0.1. The function modifies the input image in-place.
 
 # Arguments
-- `img::Union{Matrix{<:Real}, BitMatrix}`: A 2D array representing the image of the colony. The colony is represented by 1s and the background by 0s.
+- `img::AbstractArray`: A 2D array representing the image of the colony. The colony is represented by 1s and the background by 0s.
 - `pixels_to_add::Int`: The number of pixels to add to the colony.
 - `dir::Vector{Int}`: A vector representing the preferred direction of expansion.
 - `dir_match_rate::AbstractFloat`: A float representing the threshold for the dot product between the preferred direction and the point. Default is 0.999.
@@ -382,7 +382,7 @@ img[50:55, 50:55] .= 1
 expand_colony_finger_radom_cov!(img, 100, [1, 0])
 ```
 """	
-function expand_colony_finger_radom_cov!(img::Union{Matrix{<:Real}, BitMatrix},pixels_to_add::Int,dir; dir_match_rate = 0.999, still_spawn_rate::AbstractFloat = 0.99, min_neigbour::Int = 2 )
+function expand_colony_finger_radom_cov!(img::AbstractArray,pixels_to_add::Int,dir; dir_match_rate = 0.999, still_spawn_rate::AbstractFloat = 0.99, min_neigbour::Int = 2 )
     pix_count = 0
     laplac_kernel = [0 1 0; 1 -4 1; 0 1 0]
     cov_img = conv( img, laplac_kernel )

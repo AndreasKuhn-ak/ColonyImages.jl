@@ -13,7 +13,10 @@ export conv,
         build_circle,
         res_scaling,
         angular_metric,
-        pair_cor_metric3
+        pair_cor_metric3,
+        build_artifical_colony!,
+        expand_colony_circular!
+
 
 include("image_functions.jl")
 include("artifical_colony_creation.jl")
