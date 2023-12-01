@@ -18,7 +18,9 @@ export conv,
         expand_colony_circular!,
         expand_colony_radom_cov!,
         filter_fourier_beta,
-        find_freq
+        find_freq,
+        expand_colony_radom_cov_show!,
+        expand_colony_point!
 
 
 

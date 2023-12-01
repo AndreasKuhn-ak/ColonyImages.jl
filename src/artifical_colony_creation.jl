@@ -147,6 +147,31 @@ function expand_colony_radom_cov!(img::AbstractArray,pixels_to_add::Int)
 end
 
 
+"""
+    expand_colony_radom_cov_show!(img::AbstractArray, pixels_to_add::Int)
+
+Expand the colony in the image `img` by adding `pixels_to_add` pixels. The expansion is done randomly 
+at the border of the colony. The border is determined by convolving the image with a Laplacian kernel 
+and finding points where the convolution is greater than 0.1. The function modifies the input image in-place.
+
+Compared to `expand_colony_radom!`, this function is faster for large images and many pixels to add, 
+but slower for small images and fewer pixels to add. This is due to the fact that the computationally heavy convolution only needs to be 
+calculated once for the whole image, whereas the distance transform in `expand_colony_radom` needs to be calculated for each iteration of the loop.
+
+# Arguments
+- `img::AbstractArray`: A 2D array representing the image of the colony. The colony is represented by 1s and the background by 0s.
+- `pixels_to_add::Int`: The number of pixels to add to the colony.
+
+# Example
+```julia
+img = zeros(100, 100)
+img[50:55, 50:55] .= 1
+expand_colony_radom_cov!(img, 100)
+```
+Compared to `expand_colony_radom!`, this function is faster for large images and many pixels to add, 
+but slower for small images and fewer pixels to add. This is due to the fact that the computational heavy convolution only needs to be 
+    calculated once for the whole image, whereas the distance transform in `expand_colony_radom` needs to be calculated for each iteration of the loop.
+"""
 function expand_colony_radom_cov_show!(img::AbstractArray,pixels_to_add::Int)
     # Initialize pixel count and Laplacian kernel 
    pix_count = 0 
@@ -181,7 +206,45 @@ function expand_colony_radom_cov_show!(img::AbstractArray,pixels_to_add::Int)
        border_points = shuffle!(findall(cov_img .> 0.1))
        shuffle_counter = 0 
    end
-   return img, cov_img	
+   return cov_img	
+end
+
+
+"""
+    expand_colony_point!(img::AbstractArray, cov_img::AbstractArray, point::Vector{Int})
+
+Expands a colony at a given point in an image. The function uses a Laplacian kernel to convolve the image and find border points. 
+If the given point is in the border points and is in the background of the image, it is added to the colony and the convolution image is updated.
+
+# Arguments
+- `img::AbstractArray`: The input image.
+- `cov_img::AbstractArray`: The convolution image.
+- `point::Vector{Int}`: The point at which to expand the colony.
+
+# Returns
+- The updated convolution image.
+"""
+function expand_colony_point!(img::AbstractArray, cov_img::AbstractArray, point::Vector{Int})
+    # Define the Laplacian kernel
+    laplac_kernel = [0 1 0; 1 -4 1; 0 1 0]
+
+    # Find border points where the convolution is greater than 0.1
+    border_points = (findall(cov_img .> 0.1))
+    point = CartesianIndex(point...)    # If the point is in the border points
+    if point in border_points
+        # If the point is in the background, add it to the colony
+        if img[point] == 0
+            img[point] = 1
+
+            # Update the convolution image as well
+            cov_img[point[1]-1:point[1]+1,point[2]-1:point[2]+1] += laplac_kernel
+            # Note: pix_count is not defined in this function. It should be defined outside this function and passed as a reference if it's needed to be updated.
+        end
+    else println("Point is not in border points")
+    end
+
+    # Return the updated convolution image
+    return cov_img	
 end
 
 
