@@ -255,7 +255,7 @@ The function returns a 2D Float64 array of the same size as the input image.
 - A 2D Float64 array representing the convolved image.
 
 """
-function conv(img::Union{Matrix{<:Real}, BitMatrix}, kernel::Union{Matrix{<:Real}, BitMatrix})
+function conv(img::AbstractArray, kernel::AbstractArray)
     # Calculate the size of the convolution
     csize = size(img) .+ size(kernel) .- 1
 

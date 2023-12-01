@@ -1,7 +1,7 @@
 module ColonyImages
 
 using Images, FFTW 
-using Statistics, StatsBase
+using Statistics, StatsBase, Random
 
 export conv, 
         b_w,
@@ -15,7 +15,11 @@ export conv,
         angular_metric,
         pair_cor_metric3,
         build_artifical_colony!,
-        expand_colony_circular!
+        expand_colony_circular!,
+        expand_colony_radom_cov!,
+        filter_fourier_beta,
+        find_freq
+
 
 
 include("image_functions.jl")

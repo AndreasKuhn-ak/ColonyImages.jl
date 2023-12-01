@@ -147,6 +147,45 @@ function expand_colony_radom_cov!(img::AbstractArray,pixels_to_add::Int)
 end
 
 
+function expand_colony_radom_cov_show!(img::AbstractArray,pixels_to_add::Int)
+    # Initialize pixel count and Laplacian kernel 
+   pix_count = 0 
+   laplac_kernel = [0 1 0; 1 -4 1; 0 1 0]
+   # Convolve the image with the Laplacian kernel
+   cov_img = conv( img, laplac_kernel )
+
+   # Find border points where the convolution is greater than 0.1 and shuffle them
+   border_points = shuffle!(findall(cov_img .> 0.1))
+   shuffle_counter = 0
+
+   # Loop until the desired number of pixels have been added
+   while pix_count < pixels_to_add
+       for point in border_points
+           # If the point is in the background, add it to the colony
+           if img[point] == 0
+               img[point] = 1
+               
+               # Update the convolution image as well
+               cov_img[point[1]-1:point[1]+1,point[2]-1:point[2]+1] += laplac_kernel
+               pix_count += 1
+           end
+           shuffle_counter += 1
+           
+           # Break the loop if we have checked 10% of the border points
+           if shuffle_counter >= length(border_points)*0.1
+               break
+           end            
+       end
+       
+       # Update the border points and reset the shuffle counter
+       border_points = shuffle!(findall(cov_img .> 0.1))
+       shuffle_counter = 0 
+   end
+   return img, cov_img	
+end
+
+
+
 """
     expand_colony_radom!(img::AbstractArray, pixels_to_add::Int)
 
