@@ -224,13 +224,12 @@ If the given point is in the border points and is in the background of the image
 # Returns
 - The updated convolution image.
 """
-function expand_colony_point!(img::AbstractArray, cov_img::AbstractArray, point::Vector{Int})
+function expand_colony_point!(img::AbstractArray, cov_img::AbstractArray, point::CartesianIndex{2})
     # Define the Laplacian kernel
     laplac_kernel = [0 1 0; 1 -4 1; 0 1 0]
 
     # Find border points where the convolution is greater than 0.1
     border_points = (findall(cov_img .> 0.1))
-    point = CartesianIndex(point...)    # If the point is in the border points
     if point in border_points
         # If the point is in the background, add it to the colony
         if img[point] == 0
