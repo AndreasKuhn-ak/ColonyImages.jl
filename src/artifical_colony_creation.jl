@@ -243,7 +243,7 @@ function expand_colony_point!(img::AbstractArray, cov_img::AbstractArray, point:
     end
 
     # Return the updated convolution image
-    return cov_img	
+    #return cov_img	
 end
 
 
