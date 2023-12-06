@@ -558,43 +558,6 @@ function pair_cor_metric3(img::Union{Matrix{<:Real}, BitMatrix}, center::Vector{
 end
 
 
-"""
-    res_scaling(img_int_vec; factor = 3, plots = 1)
-
-Scales the resolution of a plot based on a given factor.
-The function counts the number of images in the given image_vec and and scales the resolution 
-of plot containg all these images accordingly.
-
-# Arguments
-- `img_int_vec`: A vector of images.
-- `factor`: The scaling factor. Defaults to 3.
-- `plots`: The number of plots per images. Defaults to 1.
-
-# Returns
-- A tuple containing the scaled width and height of the image.
-
-"""
-function res_scaling(img_int_vec; factor = 3, plots = 1)
-    # Initialize the counter
-    c = 0
-
-    # Iterate over the images
-    for i in img_int_vec
-        # Iterate over the slices in the image
-        for j in 1:size(i,3)
-            # Increment the counter
-            c += 1
-        end
-    end
-
-    # Calculate the scaled width and height of the image
-    width = round(Int64, factor * 1000) * plots
-    height = round(Int64, factor * 200 * (c ÷ 5 + ((c % 5 == 0) ? 0 : 1)))
-
-    return width, height
-end
-
-
 
 replace_nan_1(x) = ismissing(x) || (x isa Number && isnan(x)) ? 1 : x
 

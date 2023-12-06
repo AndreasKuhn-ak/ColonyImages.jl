@@ -445,9 +445,9 @@ yy = zeros(number_vecs)
 arrows(yy,yy, y, x)
 ```
 """
-function generate_dir_vec(number_fingers, rand_dist)
+function generate_dir_vec(para::parameters)
     # Generate the angles for the vectors vectus
-    vectus = 2π/number_fingers.*[1:number_fingers...]+ rand(number_fingers) *rand_dist
+    vectus = 2π/para.number_finger.*[1:para.number_finger...].+ rand(para.number_finger) *para.finger_dist
     # Calculate the y and x coordinates of the vectors
     y = sin.(vectus)
     x = cos.(vectus)

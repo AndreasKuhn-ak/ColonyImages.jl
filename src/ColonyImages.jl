@@ -2,8 +2,9 @@ module ColonyImages
 
 using Images, FFTW, CairoMakie
 using Statistics, StatsBase, Random, Parameters
+using LinearAlgebra
 
-export conv,
+export  conv,
         parameters, 
         b_w,
         fill_holes,
@@ -22,9 +23,13 @@ export conv,
         find_freq,
         expand_colony_radom_cov_show!,
         expand_colony_point!,
+        expand_colony_finger_radom_cov!,
+        generate_dir_vec,
         plot_time_series_cov_centroid,
         plot_convolution_schematic3,
-        plot_convolution_schematic2
+        plot_convolution_schematic2,
+        plot_time_series_metrics,
+        plot_metric_schematic
         
 
 
