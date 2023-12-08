@@ -283,8 +283,34 @@ function plot_convolution_schematic2(colony::AbstractArray,colony_cov::AbstractA
 end
 
 
+
+"""
+    plot_metric_schematic(colony::AbstractArray, para::parameters, colormap ; name = "metric_fig1")
+
+This function creates a schematic plot of a colony image and how it is cut into angle section to be analysed later. 
+
+# Arguments
+- `colony::AbstractArray`: A  3D array representing the colony image stack.
+- `para::parameters`: A parameters object containing various parameters for the analysis.
+- `colormap`: A colormap to use for the heatmap.
+- `name::String`: An optional name for the output plot. Default is "metric_fig1".
+
+# Returns
+- `fig::Figure`: A Figure object containing the plots.
+
+# Details
+The function first creates a Figure object and extracts the first and last images from the colony stack. It creates a kernel based on the approximate radius of the colony and the kernel ratio parameter.
+
+The function then cuts a portion of the last image and rotates it 90 degrees. It creates two Axis objects on the Figure and hides their decorations.
+
+The function then cuts a portion of the first image and rotates it 90 degrees. It adds a heatmap to the first Axis, showing the difference between the last and first images.
+
+The function then creates a pie chart on the second Axis, with each slice having an equal value, representing the angle sections of the colony.
+
+Finally, the function returns the Figure object.
+"""
 function plot_metric_schematic(colony::AbstractArray, para::parameters, colormap ; name = "metric_fig1")
-    fig_89 = Figure(size =(1500,round(Int,1500)), fontsize = 28)
+    fig = Figure(size =(1500,round(Int,1500)), fontsize = 28)
     int_img = colony[:,:,1]
     kernel = create_kernel(round(Int64,approx_radi_colo(int_img)*para.kernel_ratio), geometry = "square")
     nneigh = sum(kernel)
@@ -296,8 +322,8 @@ function plot_metric_schematic(colony::AbstractArray, para::parameters, colormap
     int_img = int_img[cut_fac:end-cut_fac,cut_fac:end-cut_fac ]
     int_img = rotr90(int_img)
     
-    ax = CairoMakie.Axis(fig_89[1,1])
-    ax2 = CairoMakie.Axis(fig_89[1,1])
+    ax = CairoMakie.Axis(fig[1,1])
+    ax2 = CairoMakie.Axis(fig[1,1])
     hidedecorations!(ax2)
     hidedecorations!(ax)
     
@@ -311,5 +337,23 @@ function plot_metric_schematic(colony::AbstractArray, para::parameters, colormap
     pie_data = [1 for i in 1:10:360]
     pie!(ax2,pie_data,radius = 10, color = (:red, 0.01))
     #axislegend(ax)
-    return fig_89
+    return fig
+end
+
+
+function plot_timeseries_heatmap(colony::AbstractArray, para::parameters; name = "Eden Growth Model", colormap  = reverse(co.Blues))
+
+    fig_eden = Figure(size= Tuple(para.im_size))
+    ax = CairoMakie.Axis(fig_eden[1,1],aspect = DataAspect(),title = name)
+    int_img = zeros(Int,para.im_size...)
+    for z in 1:size(colony,3)
+        int_img += colony[:,:,z]
+    end 
+    heaty = heatmap!(ax,(int_img .-(maximum(int_img))) .*-1 , colormap = colormap)
+    hidedecorations!(ax)
+    Colorbar(fig_eden[1,2], heaty ,ticks = (0:(length(para.time_points)-1),string.(para.time_points)), label = "time [h]",tellheight=true)
+    rowsize!(fig_eden.layout, 1, Aspect(1, 1))
+
+    save("plots/$(name).pdf",fig_eden)
+    return fig_eden
 end

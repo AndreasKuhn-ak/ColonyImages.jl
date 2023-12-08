@@ -3,6 +3,7 @@ module ColonyImages
 using Images, FFTW, CairoMakie
 using Statistics, StatsBase, Random, Parameters
 using LinearAlgebra
+import ColorSchemes as co
 
 export  conv,
         parameters, 
@@ -29,7 +30,8 @@ export  conv,
         plot_convolution_schematic3,
         plot_convolution_schematic2,
         plot_time_series_metrics,
-        plot_metric_schematic
+        plot_metric_schematic,
+        plot_timeseries_heatmap
         
 
 

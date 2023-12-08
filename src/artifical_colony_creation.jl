@@ -424,25 +424,26 @@ end
 
 
 """
-    generate_dir_vec(number_fingers, rand_dist)
+    generate_dir_vec(para::parameters)
 
 Generates vectors of x and y coordinates that span vectors ranging from 0 to 2π. 
 This function is used to generate the vectors used in `expand_colony_finger_radom_cov!`.
 
 # Arguments
-- `number_fingers`: The number of vectors to generate.
-- `rand_dist`: The random distance to add to the vectors.
+- `para::parameters`: A parameters object containing various parameters for the analysis. 
+  - `number_finger`: The number of vectors to generate.
+  - `finger_dist`: The random distance to add to the vectors.
 
 # Returns
-- `dir`: A vector of vectors, each containing the y and x coordinates of a vector.
+- `dir::Array{Array{Float64,1},1}`: A vector of vectors, each containing the y and x coordinates of a vector.
 
 # Example
 ```julia
 using CairoMakie
-number_vecs = 20
-y,x = generate_dir_vec(20,0.1)
-yy = zeros(number_vecs)
-arrows(yy,yy, y, x)
+para = parameters(number_finger = 20, finger_dist = 0.1)
+dir = generate_dir_vec(para)
+yy = zeros(para.number_finger)
+arrows(yy,yy, [d[1] for d in dir], [d[2] for d in dir])
 ```
 """
 function generate_dir_vec(para::parameters)
