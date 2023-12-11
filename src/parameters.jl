@@ -50,5 +50,6 @@ A struct that holds various parameters for colony image processing, creation and
     col_size_add_diff::Vector{Float64}  = col_size_add[2:end]-col_size_add[1:end-1]
     number_finger::Int                  = 15
     finger_dist::AbstractFloat          = 0.1
+    pixel_to_add::Function              = colony ->round.(Int,sum(colony[:,:,1]).*(col_size_add_diff))
 end
 
