@@ -254,6 +254,50 @@ function plot_and_save_time_series_metrics!(img_vec::AbstractArray, para::parame
 end
 
 
+
+
+
+"""
+    save_time_series_metrics!(img_vec::AbstractArray, para::parameters, df::DataFrame; name_data="random_growth")
+
+This function calculates and saves time series metrics for a given set of images.
+
+# Arguments
+- `img_vec::AbstractArray`: An array of image stacks.
+- `para::parameters`: An object containing various parameters for the analysis.
+- `df::DataFrame`: The DataFrame to which the calculated metrics will be appended.
+- `name_data::String`: (optional) A string representing the name of the data set. Default is "random_growth".
+
+# Returns
+- `data_set::String`: The name of the data set.
+"""
+function save_time_series_metrics!(img_vec::AbstractArray, para::parameters,df::DataFrame; name_data ="random_growth" )
+    data_set =  name_data * " $(Dates.format(now(), "yyyy_mm_dd"))"
+    for (i,img_stack) in enumerate(img_vec)
+        int_img = img_stack[:,:,1]
+        y1,x1 = centroid(int_img)
+        kernel = create_kernel(round(Int64,approx_radi_colo(int_img)*para.kernel_ratio), geometry = "square")
+        nneigh = sum(kernel)
+        
+        for z in 1:size(img_stack,3)
+            int_img = img_stack[:,:,z]
+            out = conv( int_img, kernel ) ./ nneigh
+            y_c, x_c = centroid(out .> para.threshold_conv)
+            ang_mec_og = angular_metric(int_img .- img_stack[:,:,1],[y1,x1], steps = para.steps_angular)
+            pair_mec_og = pair_cor_metric3(z == 1 ? int_img : int_img .- img_stack[:,:,1],[y1,x1], steps = para.steps_angular,samples = para.samples_pair)
+            
+            fitted_circle = build_circle([y_c, x_c], int_img, para.Points, threshold = para.threshold_c)
+            ang_mec_conv = angular_metric(z == 1 ? int_img : int_img .- fitted_circle , [y1,x1], steps = para.steps_angular )
+            
+            pair_mec_conv = pair_cor_metric3(z == 1 ? int_img : int_img.- fitted_circle, [y_c, x_c], steps = para.steps_angular,samples = para.samples_pair )
+            
+            push!(df,[data_set,para.colonies[i],para.time_points[z],ang_mec_og,ang_mec_conv,pair_mec_og,pair_mec_conv,sum(img_stack[:,:,1])])
+        end
+    end
+    return data_set
+end
+
+
 """
     plot_convolution_schematic3(colony, colony_cov, para; name = "cov_fig_kernel")
 
