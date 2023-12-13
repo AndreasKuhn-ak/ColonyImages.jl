@@ -36,20 +36,30 @@ end
 
 
 """
-    plot_time_series_cov_centroid(img_vec; kernel_ratio = 0.4)
+    plot_time_series_cov_centroid(img_vec::AbstractArray, para::parameters)
 
 Generates a time series plot of the centroids of the images in `img_vec`. The centroids are calculated in three ways: 
 1. The original centroid of the first timestep of the timeseries.
 2. The centroid after applying a convolution operation.
-3. The current centroid of the image (for t = 1, 1. == 3.).
+3. The current centroid of the image.
 
 # Arguments
-- `img_vec`: A vector of 3D image stacks.
-- `kernel_ratio::Float64`: The ratio for the kernel operation. Default is `0.4`.
+- `img_vec::AbstractArray`: A vector of 3D image stacks.
+- `para::parameters`: A parameters object containing various parameters for the analysis. 
+  - `kernel_ratio::Float64`: The ratio for the kernel operation. Default is `0.4`.
+  - `plot_factor`: The scaling factor for the plot size.
+  - `threshold_conv`: The threshold for the convolution operation.
+  - `colonies`: The names of the colonies.
 
 # Returns
-- A figure with the time series plot of the centroids.
+- `fig_big::Figure`: A Figure object with the time series plot of the centroids.
 
+# Example
+```julia
+img_vec = [rand(100, 100, 10) for _ in 1:5]
+para = parameters(kernel_ratio = 0.4, plot_factor = 1, threshold_conv = 0.5, colonies = ["Colony i" for i in 1:5])
+fig = plot_time_series_cov_centroid(img_vec, para)
+```
 """
 function plot_time_series_cov_centroid(img_vec::AbstractArray, para::parameters)
     fig_big = Figure(size = res_scaling(img_vec, factor = para.plot_factor))
@@ -157,6 +167,91 @@ function plot_time_series_metrics(img_vec::AbstractArray, para::parameters)
     return fig_big
 end
 
+
+
+"""
+    plot_and_save_time_series_metrics!(img_vec::AbstractArray, para::parameters, df::DataFrame; name_data ="random_growth")
+
+This function creates a series of plots for each image in a stack, showing the original image, the angular metric, and the pair correlation metric. It also updates a DataFrame with the metrics.
+
+# Arguments
+- `img_vec::AbstractArray`: A 4D array where the first two dimensions are the image dimensions, the third dimension is the time point, and the fourth dimension is the image stack.
+- `para::parameters`: A parameters object containing various parameters for the analysis. 
+  - `plot_factor`: The scaling factor for the plot size.
+  - `kernel_ratio::Float64`: The ratio for the kernel operation.
+  - `threshold_conv`: The threshold for the convolution operation.
+  - `steps_angular`: The number of steps for the angular metric calculation.
+  - `samples_pair`: The number of samples for the pair correlation metric calculation.
+  - `Points`: The number of points for the circle fitting.
+  - `threshold_c`: The threshold for the circle fitting.
+  - `colonies`: The names of the colonies.
+- `df::DataFrame`: A DataFrame to update with the metrics.
+- `name_data::String`: A string to prepend to the date for the data set name in the DataFrame. Default is "random_growth".
+
+# Returns
+- `fig_big::Figure`: A Figure object containing the plots.
+
+# Details
+The function first creates a Figure object with a size determined by the `res_scaling` function. It then loops over each image stack in `img_vec`. For each stack, it calculates the centroid of the first image and creates a kernel based on the approximate radius of the colony in the image.
+
+The function then loops over each time point in the image stack. For each time point, it calculates the centroid of the convoluted image and calculates the angular metric and pair correlation metric for the original image and the image minus the first image in the stack.
+
+The function then fits a circle to the image and calculates the angular metric and pair correlation metric for the image minus the fitted circle.
+
+The function then creates three Axis objects for the original image, the angular metric, and the pair correlation metric, and adds plots to each axis. If the time point is not the first, it also plots the angular metric and pair correlation metric for the image minus the fitted circle.
+
+Finally, the function increments a counter, updates the DataFrame with the metrics, and returns the Figure object after looping over all image stacks and time points.
+"""
+function plot_and_save_time_series_metrics!(img_vec::AbstractArray, para::parameters,df::DataFrame; name_data ="random_growth" )
+    a = 1
+    fig_big = Figure(size = res_scaling(img_vec, factor =para.plot_factor, plots = 3))
+    c = 0 
+    data_set =  name_data * " $(Dates.format(now(), "yyyy_mm_dd"))"
+    for (i,img_stack) in enumerate(img_vec)
+        int_img = img_stack[:,:,1]
+        y1,x1 = centroid(int_img)
+        kernel = create_kernel(round(Int64,approx_radi_colo(int_img)*para.kernel_ratio), geometry = "square")
+        nneigh = sum(kernel)
+        
+        for z in 1:size(img_stack,3)
+            int_img = img_stack[:,:,z]
+            out = conv( int_img, kernel ) ./ nneigh
+            y_c, x_c = centroid(out .> para.threshold_conv)
+            ang_mec_og = angular_metric(int_img .- img_stack[:,:,1],[y1,x1], steps = para.steps_angular)
+            pair_mec_og = pair_cor_metric3(z == 1 ? int_img : int_img .- img_stack[:,:,1],[y1,x1], steps = para.steps_angular,samples = para.samples_pair)
+            
+            fitted_circle = build_circle([y_c, x_c], int_img, para.Points, threshold = para.threshold_c)
+            ang_mec_conv = angular_metric(z == 1 ? int_img : int_img .- fitted_circle , [y1,x1], steps = para.steps_angular )
+            
+            pair_mec_conv = pair_cor_metric3(z == 1 ? int_img : int_img.- fitted_circle, [y_c, x_c], steps = para.steps_angular,samples = para.samples_pair )
+            
+            ax = CairoMakie.Axis(fig_big[c÷5+1,(c%5+1)*3-2], title = para.colonies[i])
+            heatmap!(ax,int_img,colormap = :algae)
+            #heatmap!(ax,out .> threshold_conv, colormap  =(:algae, 0.2))
+            scatter!(ax,y1,x1, color = :blue, markersize = 10, label = "first centroid")
+            scatter!(ax,y_c, x_c, color = :yellow, markersize = 10, label = "Convolut centroid")
+            axislegend(ax)
+            
+            ax2 = CairoMakie.Axis(fig_big[c÷5+1,(c%5+1)*3-1], title = para.colonies[i])
+            lines!(ax2,ang_mec_og, label = "OG angular metric" )
+            
+            ax3 = CairoMakie.Axis(fig_big[c÷5+1,(c%5+1)*3], title = para.colonies[i])
+            lines!(ax3,pair_mec_og, label = "OG pair metric" )
+            # convoluted angular metrix does not make sense for colony without expansion 
+            if z != 1
+                lines!(ax2,ang_mec_conv, label = "conv angular metric" )
+                lines!(ax3,pair_mec_conv, label = "conv pair metric" )
+            end
+            axislegend(ax2)
+            axislegend(ax3)
+            
+            push!(df,[data_set,para.colonies[i],para.time_points[z],ang_mec_og,ang_mec_conv,pair_mec_og,pair_mec_conv,sum(img_stack[:,:,1])])
+            c += 1
+        end
+    end
+
+    return fig_big, data_set
+end
 
 
 """
@@ -340,7 +435,31 @@ function plot_metric_schematic(colony::AbstractArray, para::parameters, colormap
     return fig
 end
 
+"""
+    plot_timeseries_heatmap(colony::AbstractArray, para::parameters; name = "Eden Growth Model", colormap  = reverse(co.Blues))
 
+This function creates a heatmap plot of a colony image stack over time.
+
+# Arguments
+- `colony::AbstractArray`: A 3D array representing the colony image stack.
+- `para::parameters`: A parameters object containing various parameters for the analysis.
+- `name::String`: An optional name for the output plot. Default is "Eden Growth Model".
+- `colormap`: An optional colormap to use for the heatmap. Default is the reverse of Blues.
+
+# Returns
+- `fig_eden::Figure`: A Figure object containing the heatmap plot.
+
+# Details
+The function first creates a Figure object and an Axis object with the title set to the provided name. It then initializes an intensity image with zeros.
+
+The function then iterates over the z-dimension of the colony stack, adding each image to the intensity image.
+
+It then creates a heatmap on the Axis, showing the intensity image with the maximum intensity subtracted and the sign reversed.
+
+The function then hides the decorations of the Axis and adds a colorbar to the Figure, with the ticks set to the time points and the label set to "time [h]".
+
+Finally, the function saves the Figure as a PDF in the plots folder and returns the Figure object.
+"""
 function plot_timeseries_heatmap(colony::AbstractArray, para::parameters; name = "Eden Growth Model", colormap  = reverse(co.Blues))
 
     fig_eden = Figure(size= Tuple(para.im_size))

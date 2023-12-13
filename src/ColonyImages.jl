@@ -2,7 +2,7 @@ module ColonyImages
 
 using Images, FFTW, CairoMakie
 using Statistics, StatsBase, Random, Parameters
-using LinearAlgebra
+using LinearAlgebra, DataFrames, Dates
 import ColorSchemes as co
 
 export  conv,
@@ -31,7 +31,8 @@ export  conv,
         plot_convolution_schematic2,
         plot_time_series_metrics,
         plot_metric_schematic,
-        plot_timeseries_heatmap
+        plot_timeseries_heatmap,
+        plot_and_save_time_series_metrics!
         
 
 
