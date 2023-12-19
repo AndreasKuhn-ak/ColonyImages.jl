@@ -53,3 +53,31 @@ A struct that holds various parameters for colony image processing, creation and
     pixel_to_add::Function              = colony ->round.(Int,sum(colony[:,:,1]).*(col_size_add_diff))
 end
 
+
+"""
+    analysis_parameters
+
+A struct for holding parameters related to the analysis.
+
+# Fields
+- `plot_theme::Attributes`: An Attributes object for setting the theme of the plots. Default is a Theme object with a fontsize of 25, a size of (1000,800), a markersize of 15 for Scatter plots, and a linewidth of 4 for Lines plots.
+
+# Example
+```julia
+params = analysis_parameters()
+```
+"""
+@with_kw struct analysis_parameters
+    plot_theme::Attributes              = Theme(    
+                                        fontsize = 25,
+                                        size = (1000,800),
+                                        Scatter = (
+                                        markersize = 15,
+                                        ),                
+                                        Lines  = ( 
+                                        linewidth =4,
+                                        ),
+                                        Errorbars = (whiskerwidth = 20, 
+                                        color = :black)
+                                        )
+end
