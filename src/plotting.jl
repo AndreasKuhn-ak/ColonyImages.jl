@@ -520,3 +520,8 @@ function plot_timeseries_heatmap(colony::AbstractArray, para::parameters; name =
     save("plots/$(name).pdf",fig_eden)
     return fig_eden
 end
+
+
+function mk_label(data_set::String)
+    return split(data_set," ")[1]
+end

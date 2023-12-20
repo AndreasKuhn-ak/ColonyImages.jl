@@ -69,10 +69,10 @@ params = analysis_parameters()
 """
 @with_kw struct analysis_parameters
     plot_theme::Attributes              = Theme(    
-                                        fontsize = 25,
+                                        fontsize = 30,
                                         size = (1000,800),
                                         Scatter = (
-                                        markersize = 15,
+                                        markersize = 18,
                                         ),                
                                         Lines  = ( 
                                         linewidth =4,
