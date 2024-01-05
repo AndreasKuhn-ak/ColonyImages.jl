@@ -527,7 +527,7 @@ function pair_cor_metric3(img::Union{Matrix{<:Real}, BitMatrix}, center::Vector{
     for i in 1:samples
         # Randomly select two non-zero pixels
         v1, v2  = sample(indizies, 2, replace = false)
-
+        
         # If the reference point is one of the pixels, select two new pixels
         while Tuple(center) in [v1,v2]
             v1, v2  = sample(indizies, 2, replace = false)
