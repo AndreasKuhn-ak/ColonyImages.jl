@@ -525,3 +525,21 @@ end
 function mk_label(data_set::String)
     return split(data_set," ")[1]
 end
+
+"""
+@h methodname
+
+Outputs documentations in jupyternotenbooks in VScode as markdown without bugs.
+
+Example of how to use the `@h` macro:
+```julia
+@h res_scaling(img_int_vec; factor = 3, plots = 1)
+```
+
+Outputs documentations in jupyternotenbooks in VScode as markdown without bugs.
+"""
+macro h(x)
+    quote
+        display("text/markdown", @doc $x)
+    end    
+end
