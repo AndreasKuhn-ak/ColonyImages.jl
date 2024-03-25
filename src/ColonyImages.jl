@@ -36,7 +36,10 @@ export  conv,
         save_time_series_metrics!,
         analysis_parameters,
         mk_label,
-        @h
+        @h,
+        expand_colony_radom_cov2!,
+        expand_colony_radom_cov_clean!
+
         
         
 
