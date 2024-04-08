@@ -136,6 +136,7 @@ function expand_colony_radom_cov!(img::AbstractArray,pixels_to_add::Int)
 
             new_border_points = findall(cov_img[point[1]-1:point[1]+1,point[2]-1:point[2]+1] .> 0.1) .+( point - CartesianIndex(2,2))
             append!(border_points, new_border_points)
+            # old border point stays in border point arrays, due to computational efficiency, but is never choosen anyways, as it does not pass the if statement
         end
         shuffle_counter += 1
         
@@ -284,7 +285,7 @@ function expand_colony_un_random_cov!(img::AbstractArray, pixels_to_add::Int, di
             shuffle_counter += 1
         end
         # Reshuffle the border points after every half of the border points have been considered
-        if shuffle_counter >= length(border_points)*0.5
+        if shuffle_counter >= length(border_points)*0.1
             border_points = shuffle!(findall(cov_img .> 0.1))
             shuffle_counter = 0 
         end
@@ -352,7 +353,7 @@ img[50:55, 50:55] .= 1
 expand_colony_finger_radom_cov!(img, 100, [1, 0])
 ```
 """	
-function expand_colony_finger_radom_cov!(img::AbstractArray,pixels_to_add::Int,dir; dir_match_rate = 0.999, still_spawn_rate::AbstractFloat = 0.99, min_neigbour::Int = 2 )
+function expand_colony_finger_radom_cov!(img::AbstractArray,pixels_to_add::Int,dir; dir_match_rate = 0.999, still_spawn_rate::AbstractFloat = 0.99, min_neigbour::Int = 1 )
     pix_count = 0
     laplac_kernel = [0 1 0; 1 -4 1; 0 1 0]
     cov_img = conv( img, laplac_kernel )
@@ -401,7 +402,7 @@ function expand_colony_finger_radom_cov!(img::AbstractArray,pixels_to_add::Int,d
         end
         shuffle_counter += 1
 
-        if shuffle_counter >= length(border_points)*0.5
+        if shuffle_counter >= length(border_points)*0.1
             border_points = shuffle!(findall(cov_img .> 0.1))
             shuffle_counter = 0 
         end   
