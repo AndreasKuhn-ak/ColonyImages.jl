@@ -13,7 +13,7 @@ of plot containg all these images accordingly.
 # Returns
 - A tuple containing the scaled width and height of the image.
 """
-function res_scaling(img_int_vec::AbstractArray; factor::AbstractFloat = 3.0, plots::Int = 1)
+function res_scaling(img_int_vec::AbstractArray; factor::Real = 3.0, plots::Int = 1)
     # Initialize the counter
     c = 0
 
