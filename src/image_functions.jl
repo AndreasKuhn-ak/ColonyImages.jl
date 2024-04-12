@@ -131,6 +131,15 @@ function occupied_points(img::Union{Matrix{<:Real}, BitMatrix})
 end
 
 
+function find_boundary_points(img::Union{Matrix{<:Real}, BitMatrix})
+    laplac_kernel = [0 1 0; 1 -4 1; 0 1 0]
+    cov_img = conv(img, laplac_kernel)
+    boundary_points = findall(x-> x < -0.5 ,cov_img)
+
+    # Return the boundary points
+    return boundary_points
+end
+
 """
     approx_radi_colo(img::Union{Matrix{<:Real}, BitMatrix})
 

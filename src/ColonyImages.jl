@@ -38,7 +38,8 @@ export  conv,
         mk_label,
         @h,
         expand_colony_radom_cov2!,
-        expand_colony_radom_cov_clean!
+        expand_colony_radom_cov_clean!,
+        find_boundary_points
 
         
         

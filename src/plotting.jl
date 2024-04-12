@@ -292,7 +292,9 @@ function save_time_series_metrics!(img_vec::AbstractArray, para::parameters,df::
             
             pair_mec_conv = pair_cor_metric3(z == 1 ? int_img : int_img.- fitted_circle, [y_c, x_c], steps = para.steps_angular,samples = para.samples_pair )
             
-            data_to_push[z] = [data_set,para.colonies[i],para.time_points[z],ang_mec_og,ang_mec_conv,pair_mec_og,pair_mec_conv,sum(int_img_og)]
+            boundary_points = find_boundary_points(int_img)
+            
+            data_to_push[z] = [data_set,para.colonies[i],para.time_points[z],ang_mec_og,ang_mec_conv,pair_mec_og,pair_mec_conv,sum(int_img_og), boundary_points]
             
         end
         #push each time point of the colony to the dataframe
@@ -302,6 +304,8 @@ function save_time_series_metrics!(img_vec::AbstractArray, para::parameters,df::
     end
     return data_set
 end
+
+
 
 
 """
