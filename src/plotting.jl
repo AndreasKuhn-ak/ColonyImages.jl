@@ -202,7 +202,7 @@ The function then creates three Axis objects for the original image, the angular
 
 Finally, the function increments a counter, updates the DataFrame with the metrics, and returns the Figure object after looping over all image stacks and time points.
 """
-function plot_and_save_time_series_metrics!(img_vec::AbstractArray, para::parameters,df::DataFrame; name_data ="random_growth" )
+function plot_and_save_time_series_metrics!(img_vec::AbstractArray, para::parameters,df::DataFrame,Points; name_data ="random_growth" )
     a = 1
     fig_big = Figure(size = res_scaling(img_vec, factor =para.plot_factor, plots = 3))
     c = 0 
@@ -220,11 +220,12 @@ function plot_and_save_time_series_metrics!(img_vec::AbstractArray, para::parame
             ang_mec_og = angular_metric(int_img .- img_stack[:,:,1],[y1,x1], steps = para.steps_angular)
             pair_mec_og = pair_cor_metric3(z == 1 ? int_img : int_img .- img_stack[:,:,1],[y1,x1], steps = para.steps_angular,samples = para.samples_pair)
             
-            fitted_circle = build_circle([y_c, x_c], int_img, para.Points, threshold = para.threshold_c)
+            fitted_circle = build_circle([y_c, x_c], int_img, Points, threshold = para.threshold_c)
             ang_mec_conv = angular_metric(z == 1 ? int_img : int_img .- fitted_circle , [y1,x1], steps = para.steps_angular )
             
             pair_mec_conv = pair_cor_metric3(z == 1 ? int_img : int_img.- fitted_circle, [y_c, x_c], steps = para.steps_angular,samples = para.samples_pair )
             
+            boundary_points = find_boundary_points(int_img)
             ax = CairoMakie.Axis(fig_big[c÷5+1,(c%5+1)*3-2], title = para.colonies[i])
             heatmap!(ax,int_img,colormap = :algae)
             #heatmap!(ax,out .> threshold_conv, colormap  =(:algae, 0.2))
@@ -245,7 +246,7 @@ function plot_and_save_time_series_metrics!(img_vec::AbstractArray, para::parame
             axislegend(ax2)
             axislegend(ax3)
             
-            push!(df,[data_set,para.colonies[i],para.time_points[z],ang_mec_og,ang_mec_conv,pair_mec_og,pair_mec_conv,sum(img_stack[:,:,1])])
+            push!(df,[data_set,para.colonies[i],para.time_points[z],ang_mec_og,ang_mec_conv,pair_mec_og,pair_mec_conv,sum(img_stack[:,:,1]),boundary_points,para])
             c += 1
         end
     end
@@ -271,7 +272,7 @@ This function calculates and saves time series metrics for a given set of images
 # Returns
 - `data_set::String`: The name of the data set.
 """
-function save_time_series_metrics!(img_vec::AbstractArray, para::parameters,df::DataFrame; name_data ="random_growth" )
+function save_time_series_metrics!(img_vec::AbstractArray, para::parameters,df::DataFrame, Points; name_data ="random_growth" )
     data_set =  name_data * " $(Dates.format(now(), "yyyy_mm_dd"))"
     for (i,img_stack) in enumerate(img_vec)
         int_img_og = img_stack[:,:,1]
@@ -287,14 +288,14 @@ function save_time_series_metrics!(img_vec::AbstractArray, para::parameters,df::
             ang_mec_og = angular_metric(int_img .- int_img_og,[y1,x1], steps = para.steps_angular)
             pair_mec_og = pair_cor_metric3(z == 1 ? int_img : int_img .- int_img_og,[y1,x1], steps = para.steps_angular,samples = para.samples_pair)
             
-            fitted_circle = build_circle([y_c, x_c], int_img, para.Points, threshold = para.threshold_c)
+            fitted_circle = build_circle([y_c, x_c], int_img, Points, threshold = para.threshold_c)
             ang_mec_conv = angular_metric(z == 1 ? int_img : int_img .- fitted_circle , [y1,x1], steps = para.steps_angular )
             
             pair_mec_conv = pair_cor_metric3(z == 1 ? int_img : int_img.- fitted_circle, [y_c, x_c], steps = para.steps_angular,samples = para.samples_pair )
             
             boundary_points = find_boundary_points(int_img)
             
-            data_to_push[z] = [data_set,para.colonies[i],para.time_points[z],ang_mec_og,ang_mec_conv,pair_mec_og,pair_mec_conv,sum(int_img_og), boundary_points]
+            data_to_push[z] = [data_set,para.colonies[i],para.time_points[z],ang_mec_og,ang_mec_conv,pair_mec_og,pair_mec_conv,sum(int_img_og), boundary_points,para]
             
         end
         #push each time point of the colony to the dataframe

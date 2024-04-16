@@ -45,12 +45,14 @@ A struct that holds various parameters for colony image processing, creation and
     colony_nr::Int                      = 4
     colonies::Vector{String}            = (["Colony $(x) artifical" for x in 1:colony_nr])
     plot_factor::AbstractFloat          = 2.0
-    Points::Vector{Vector{Vector{Int}}} = lattice_points(Int(maximum(im_size)÷2))
     col_size_add::Vector{Float64}       = colony_size.(time_points).-1
     col_size_add_diff::Vector{Float64}  = col_size_add[2:end]-col_size_add[1:end-1]
     number_finger::Int                  = 15
     finger_dist::AbstractFloat          = 0.1
     pixel_to_add::Function              = colony ->round.(Int,sum(colony[:,:,1]).*(col_size_add_diff))
+    spawn_rate::AbstractFloat           = 0.2
+    dir_match_rate_B::AbstractFloat     = 0.995
+    dir_match_rate_C::AbstractFloat     = 0.995
 end
 
 
