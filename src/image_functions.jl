@@ -604,6 +604,69 @@ function filter_fourier_alpha(vec::Vector{<:Real}; a::Int = 5)
 end
 
 
+
+"""
+    moving_avg(X::Vector, numofele::Int = length(X) ÷ 2)
+
+Calculates the moving average of a vector `X` using a window of size `numofele`.
+
+# Arguments
+- `X::Vector`: The input vector for which the moving average is to be calculated.
+- `numofele::Int`: The number of elements to consider for the moving average (i.e., the window size). Defaults to half the length of `X`.
+
+# Returns
+- A vector of the same length as `X` where each element is the moving average of `numofele` elements centered around the corresponding element in `X`.
+
+# Notes
+The function handles the edges by shrinking the window size so that it fits within the input vector.
+
+"""
+function moving_avg(X::Vector,numofele::Int= length(X)÷2)
+    # Calculate the number of elements to look behind and ahead for the moving average
+    BackDelta = div(numofele,2) 
+    ForwardDelta = isodd(numofele) ? div(numofele,2) : div(numofele,2) - 1
+    
+    len = length(X)
+    
+    # Initialize the output vector
+    Y = zeros(Float64,len)
+    
+    # Calculate the moving average for each element in the input vector
+    for n = 1:len
+        # Determine the range of elements to include in the moving average
+        lo = max(1,n - BackDelta)
+        hi = min(len,n + ForwardDelta)
+        
+        # Calculate the moving average and store it in the output vector
+        Y[n] = mean(X[lo:hi])
+    end
+    
+    return Y
+end
+
+
+"""
+    anisotropy_index(X::Vector)
+
+Calculates the anisotropy index of a vector `X`.
+
+# Arguments
+- `X::Vector`: The input vector for which the anisotropy index is to be calculated.
+
+# Returns
+- A scalar value representing the anisotropy index of `X`.
+
+# Notes
+The anisotropy index is calculated as the difference between the maximum and minimum values of `X`, divided by the sum of the maximum and minimum values. Before the calculation, a moving average is applied to `X` using the `moving_avg` function.
+
+"""
+function anisotropy_index(X::Vector)
+    # Apply moving average to the input vector
+    X = moving_avg(X)
+    
+    # Calculate and return the anisotropy index
+    return (maximum(X) - minimum(X))/(maximum(X) + minimum(X))
+end
 """
     filter_fourier_beta(vec::Vector{<:Real}; b::AbstractFloat = 0.5)
 

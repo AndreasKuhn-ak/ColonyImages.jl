@@ -51,8 +51,8 @@ A struct that holds various parameters for colony image processing, creation and
     finger_dist::AbstractFloat          = 0.1
     pixel_to_add::Function              = colony ->round.(Int,sum(colony[:,:,1]).*(col_size_add_diff))
     spawn_rate::AbstractFloat           = 0.2
-    dir_match_rate_B::AbstractFloat     = 0.995
-    dir_match_rate_C::AbstractFloat     = 0.995
+    dir_match_rate_B::AbstractFloat     = 0.9995
+    dir_match_rate_C::AbstractFloat     = 0.9995
 end
 
 

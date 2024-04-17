@@ -39,7 +39,9 @@ export  conv,
         @h,
         expand_colony_radom_cov2!,
         expand_colony_radom_cov_clean!,
-        find_boundary_points
+        find_boundary_points,
+        moving_avg,
+        anisotropy_index
 
         
         
