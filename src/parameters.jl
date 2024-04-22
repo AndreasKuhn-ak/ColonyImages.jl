@@ -15,8 +15,8 @@ A struct that holds various parameters for colony image processing, creation and
 - `stacks::Int`: The number of stacks, which is the length of `time_points`.
 - `radius_colony::Int`: The radius of the colony. Default is `round(Int,(im_size[1]*0.05))`.
 - `Center::Vector{Int}`: The center of the image. Default is `round.(Int,im_size./2)`.
-- `growth_rate::Float64`: The growth rate of the colony. Default is `0.02971700864000873`.
-- `colony_size::Function`: A function to calculate the size of the colony. Default is `t-> (1+growth_rate).^t`.
+- `growth_rate::Float64`: The growth rate of the colony. Default is `[0.02971700864000873,0.0,.0,.0]` The 3 additional terms are only relevant for an addtional sigmodal growth component.
+- `colony_size::Function`: A function to calculate the size of the colony. Default is `t-> (1+growth_rate[1]).^t + growth_rate[2] ./ (1 .+ exp.(-growth_rate[3] .* (t .- growth_rate[4])))`.
 - `relative_size_filles_holes::Float64`: The relative size of filled holes. Default is `0.01`.
 - `laplac_kernel::Matrix{Int}`: The Laplacian kernel. Default is `[0 1 0; 1 -4 1; 0 1 0]`.
 - `colony_nr::Int`: The number of colonies. Default is `4`.
@@ -38,8 +38,8 @@ A struct that holds various parameters for colony image processing, creation and
     stacks::Int                         = length(time_points)
     radius_colony::Int                  = round(Int,(im_size[1]*0.05))
     Center::Vector{Int}                 = round.(Int,im_size./2)
-    growth_rate::Float64                = 0.02971700864000873
-    colony_size::Function               = t-> (1+growth_rate).^t 
+    growth_rate::Vector{Float64}        = [0.02971700864000873,0.0,.0,.0]
+    colony_size::Function               = t-> (1+growth_rate[1]).^t + growth_rate[2] ./ (1 .+ exp.(-growth_rate[3] .* (t .- growth_rate[4])))
     relative_size_filles_holes::Float64 = 0.01
     laplac_kernel::Matrix{Int}          = [0 1 0; 1 -4 1; 0 1 0]
     colony_nr::Int                      = 4
