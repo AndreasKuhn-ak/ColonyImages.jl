@@ -527,7 +527,7 @@ function plot_timeseries_heatmap(colony::AbstractArray, para::parameters; name =
     hidedecorations!(ax)
     Colorbar(fig_eden[1,2], heaty ,ticks = (0:(length(para.time_points)-1),string.(para.time_points)), label = "time [h]",tellheight=true)
     rowsize!(fig_eden.layout, 1, Aspect(1, 1))
-
+    name = replace(name,": " => "_")
     save("plots/$(name).pdf",fig_eden)
     return fig_eden
 end
