@@ -38,7 +38,7 @@ A struct that holds various parameters for colony image processing, creation and
     stacks::Int                         = length(time_points)
     radius_colony::Int                  = round(Int,(im_size[1]*0.05))
     Center::Vector{Int}                 = round.(Int,im_size./2)
-    growth_rate::Vector{Float64}        = [0.02971700864000873,0.0,.0,.0]
+    growth_rate::Union{Float64, Vector{Float64}}        = [0.02971700864000873,0.0,.0,.0]
     colony_size::Function               = t-> (1+growth_rate[1]).^t + growth_rate[2] ./ (1 .+ exp.(-growth_rate[3] .* (t .- growth_rate[4])))
     relative_size_filles_holes::Float64 = 0.01
     laplac_kernel::Matrix{Int}          = [0 1 0; 1 -4 1; 0 1 0]
