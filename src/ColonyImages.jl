@@ -42,7 +42,8 @@ export  conv,
         find_boundary_points,
         moving_avg,
         anisotropy_index,
-        expand_matrix
+        expand_matrix,
+        DataFrame_Colony
 
         
         

@@ -1,4 +1,32 @@
 """
+    DataFrame_Colony()
+
+This function creates and returns an empty DataFrame with a predefined structure for storing analysis data in the `colonyimages` package.
+
+# Returns
+- `df`: A DataFrame with the following columns:
+    - `data_set::String[]`: A column for the dataset names.
+    - `colony::String[]`: A column for the colony names.
+    - `time::Int[]`: A column for the time points.
+    - `metric_OG::Vector{Vector{Int64}}`: A column for the original metric data. Each entry is a vector of integers.
+    - `metric_cov::Vector{Vector{Int64}}`: A column for the metric data after convolution. Each entry is a vector of integers.
+    - `pair_OG::Vector{Vector{Int64}}`: A column for the original pair correlation data. Each entry is a vector of integers.
+    - `pair_cov::Vector{Vector{Int64}}`: A column for the pair correlation data after convolution. Each entry is a vector of integers.
+    - `OG_size::Int[]`: A column for the original sizes of the colonies.
+
+# Example
+```julia
+df = DataFrame_Colony()
+```
+"""
+function DataFrame_Colony()
+    df = DataFrame(data_set =String[], colony = String[], time = Int[], 
+    metric_OG =Vector{Vector{Int64}}(undef,0), metric_cov = Vector{Vector{Int64}}(undef,0),
+    pair_OG =Vector{Vector{Int64}}(undef,0),pair_cov =Vector{Vector{Int64}}(undef,0),OG_size = Int[])
+    return df
+end
+
+"""
     centroid(img::Union{Matrix{<:Real}, BitMatrix})
 
 Calculates the centroid of a given image `img`.
@@ -42,11 +70,11 @@ end
 """
     lattice_points(r::Int)
 
-Generates a lattice of points within a circle of radius `r`.
+Generates asceding discrete lattice points within a circle of radius `r`.
 
 The function returns a nested vector of points, each represented by its x and y coordinates. 
-The points are sorted by their distance from the origin and grouped into bands, 
-each band containing points that have a similar distance to the origin.
+The points are sorted by their distance from the origin and grouped into bands with width 1, 
+each band containing all points with the same first decicmal and an asceding distance to the origin.
 
 # Arguments
 - `r::Int`: The radius of the circle within which the lattice points are generated.
@@ -79,7 +107,9 @@ function lattice_points(r::Int)
         end
     end
 
-    # Sort the points by their distance from the origin
+    # Shuffle the points to avoid bias in one of the quadrants
+    shuffle!(points)
+    # Sort the points by their distance from the origin 
     sort!(points, by = x-> x[3])
 
     # Round the coordinates of the points to the nearest integer
