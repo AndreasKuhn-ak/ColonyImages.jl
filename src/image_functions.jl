@@ -12,7 +12,7 @@ This function creates and returns an empty DataFrame with a predefined structure
     - `metric_cov::Vector{Vector{Int64}}`: A column for the metric data after convolution. Each entry is a vector of integers.
     - `pair_OG::Vector{Vector{Int64}}`: A column for the original pair correlation data. Each entry is a vector of integers.
     - `pair_cov::Vector{Vector{Int64}}`: A column for the pair correlation data after convolution. Each entry is a vector of integers.
-    - `OG_size::Int[]`: A column for the original sizes of the colonies.
+    - `OG_size::Int[]`: A column for the original sizes of the colonies in pixels, used for later normalizations.
 
 # Example
 ```julia
@@ -22,7 +22,8 @@ df = DataFrame_Colony()
 function DataFrame_Colony()
     df = DataFrame(data_set =String[], colony = String[], time = Int[], 
     metric_OG =Vector{Vector{Int64}}(undef,0), metric_cov = Vector{Vector{Int64}}(undef,0),
-    pair_OG =Vector{Vector{Int64}}(undef,0),pair_cov =Vector{Vector{Int64}}(undef,0),OG_size = Int[])
+    pair_OG =Vector{Vector{Int64}}(undef,0),pair_cov =Vector{Vector{Int64}}(undef,0),
+    OG_size = Int[], border_points =Vector{Vector{CartesianIndex{2}}}(undef,0), Parameters = Vector{parameters}(undef,0))
     return df
 end
 

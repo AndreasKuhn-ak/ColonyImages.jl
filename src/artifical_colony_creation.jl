@@ -416,3 +416,69 @@ end
 
 
 
+
+
+"""
+    expand_colony_radom_cov!(img::AbstractArray, pixels_to_add::Int)
+
+Expand the colony in the image `img` by adding `pixels_to_add` pixels. The expansion is done randomly 
+at the border of the colony. The border is determined by convolving the image with a Laplacian kernel 
+and finding points where the convolution is greater than 0.1. The function modifies the input image in-place.
+
+Compared to `expand_colony_radom!`, this function is faster for large images and many pixels to add, 
+but slower for small images and fewer pixels to add. This is due to the fact that the computationally heavy convolution only needs to be 
+calculated once for the whole image, whereas the distance transform in `expand_colony_radom` needs to be calculated for each iteration of the loop.
+
+# Arguments
+- `img::AbstractArray`: A 2D array representing the image of the colony. The colony is represented by 1s and the background by 0s.
+- `pixels_to_add::Int`: The number of pixels to add to the colony.
+
+# Example
+```julia
+img = zeros(100, 100)
+img[50:55, 50:55] .= 1
+expand_colony_radom_cov!(img, 100)
+```
+Compared to `expand_colony_radom!`, this function is faster for large images and many pixels to add, 
+but slower for small images and fewer pixels to add. This is due to the fact that the computational heavy convolution only needs to be 
+    calculated once for the whole image, whereas the distance transform in `expand_colony_radom` needs to be calculated for each iteration of the loop.
+"""
+function expand_colony_radom_cov_show!(img::AbstractArray,pixels_to_add::Int)
+     # Initialize pixel count and Laplacian kernel 
+    pix_count = 0 
+    laplac_kernel = [0 1 0; 1 -4 1; 0 1 0]
+    # Convolve the image with the Laplacian kernel
+    cov_img = conv( img, laplac_kernel )
+
+    # Find border points where the convolution is greater than 0.1 and shuffle them
+    border_points = shuffle!(findall(cov_img .> 0.1))
+    shuffle_counter = 0
+
+    # Loop until the desired number of pixels have been added
+    while pix_count < pixels_to_add
+        point = rand(border_points)
+        
+        # If the point is in the background, add it to the colony
+        if img[point] == 0
+            img[point] = 1
+            
+            # Update the convolution image as well
+            cov_img[point[1]-1:point[1]+1,point[2]-1:point[2]+1] += laplac_kernel
+            pix_count += 1
+
+            new_border_points = findall(cov_img[point[1]-1:point[1]+1,point[2]-1:point[2]+1] .> 0.1) .+( point - CartesianIndex(2,2))
+            append!(border_points, new_border_points)
+            # old border point stays in border point arrays, due to computational efficiency, but is never choosen anyways, as it does not pass the if statement
+        end
+        shuffle_counter += 1
+        
+
+        # recreate the border_points vector if  over 50% of the original border points have been checked
+        if shuffle_counter >= length(border_points)*0.5
+            border_points = shuffle!(findall(cov_img .> 0.1))
+            shuffle_counter = 0 
+        end            
+        
+    end
+    return cov_img
+end
