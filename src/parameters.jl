@@ -28,7 +28,7 @@ A struct that holds various parameters for colony image processing, creation and
 """
 @with_kw struct parameters
     time_points::Vector{Float64}        = Float64[0,48,96,144]
-    threshold_conv::Float64             = 0.8
+    threshold_conv::Float64             = 0.7
     threshold_c::Float64                = 0.8
     kernel_ratio::Float64               = 0.4
     steps_angular::Int                  = 360
@@ -51,8 +51,8 @@ A struct that holds various parameters for colony image processing, creation and
     finger_dist::AbstractFloat          = 0.1
     pixel_to_add::Function              = colony ->round.(Int,sum(colony[:,:,1]).*(col_size_add_diff))
     spawn_rate::AbstractFloat           = 0.2
-    dir_match_rate_B::AbstractFloat     = 0.9995
-    dir_match_rate_C::AbstractFloat     = 0.9995
+    dir_match_rate_B::AbstractFloat     = 0.9993
+    dir_match_rate_C::AbstractFloat     = 0.9993
 end
 
 
