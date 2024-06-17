@@ -1,4 +1,30 @@
 """
+    initialize_colonies(para::parameters)
+
+Initialize colonies for simulations.
+
+# Arguments
+- `para::parameters`: A `parameters` object containing simulation parameters.
+
+# Returns
+- `vec_of_sims`: A vector of vectors of `BitArray{3}` representing the initialized empty arrays which will later became colonies.
+
+"""
+function initialize_colonies(para::parameters)
+    vec_of_sims = Vector{Vector{BitArray{3}}}(undef, 0)
+    for i in 1:length(para.simulations)
+        img_int_vec_1 = Vector{BitArray{3}}(undef, 0)
+        for i in 1:para.colony_nr
+            hans = BitArray(zeros(Bool, para.im_size..., para.stacks))
+            push!(img_int_vec_1, hans)
+        end
+        push!(vec_of_sims, img_int_vec_1)
+    end
+    return vec_of_sims
+end
+
+
+"""
     build_artifical_colony!(center::Vector{Int}, img::AbstractArray}, radius::Int, points::Vector{Vector{Vector{Int}}})
 
 This function constructs an artificial spherical colony within a given image. The colony is represented as a circle with a specified center and radius. 
@@ -481,4 +507,61 @@ function expand_colony_radom_cov_show!(img::AbstractArray,pixels_to_add::Int)
         
     end
     return cov_img
+end
+
+
+"""
+    growth_colonies(vec_of_sims::Vector{Vector{BitArray{3}}}, para::parameters, Points::Vector{Vector{Vector{Int}}})
+
+Simulates the growth of colonies based on the provided parameters and initial conditions.
+
+# Arguments
+- `vec_of_sims`: A vector of 3D bit arrays representing the initial state of each colony.
+- `para`: An instance of the `parameters` struct containing the simulation parameters.
+- `Points`: A vector of vectors of vectors of integers representing the points in the colony.
+
+# Details
+The function first creates an artificial colony using the `build_artifical_colony!` function. It then iterates over the simulations and colonies specified in `para`, expanding each colony at each time point based on the specified simulation type ("Random", "Finger_weak", or "Finger_strong").
+
+# Example
+```julia
+growth_colonies(vec_of_sims, para, Points)
+```
+"""	
+function growth_colonies(vec_of_sims::Vector{Vector{BitArray{3}}}, para::parameters,Points::Vector{Vector{Vector{Int}}})
+    # Initialize the vector to store the pixels to add and the image of the colony
+    pixel_to_add_vec = Int[];
+    copy_int_img = BitArray(zeros(Bool, para.im_size...,));
+
+    # Build the initial artificial colony
+    build_artifical_colony!(para.Center, copy_int_img, para.radius_colony, Points);
+    pixel_to_add_vec = para.pixel_to_add(copy_int_img);
+
+    # Iterate over the simulations and colonies
+    for (x, sim) in collect(enumerate(para.simulations))
+        Threads.@threads for (i, colony) in collect(enumerate(vec_of_sims[x]))
+            for (j, t) in enumerate(para.time_points)
+                # Use a view to work on the array directly
+                int_img  = @view colony[:,:,j];
+                dir_vec = generate_dir_vec(para);
+
+                if j == 1
+                    # Build the initial artificial colony
+                    build_artifical_colony!(para.Center, int_img, para.radius_colony, Points);
+                else
+                    # Copy the state of the colony from the previous time point
+                    int_img[:] = colony[:,:,j-1];
+
+                    # Expand the colony based on the simulation type
+                    if sim == "Random"
+                        expand_colony_radom_cov!(int_img, pixel_to_add_vec[j-1]);
+                    elseif sim == "Finger_weak"
+                        expand_colony_finger_radom_cov!(int_img, pixel_to_add_vec[j-1], dir_vec, still_spawn_rate= para.spawn_rate, dir_match_rate = para.dir_match_rate_B);
+                    elseif sim == "Finger_strong"
+                        expand_colony_finger_radom_cov!(int_img, pixel_to_add_vec[j-1], dir_vec, still_spawn_rate= 0.0, dir_match_rate = para.dir_match_rate_C);
+                    end
+                end
+            end
+        end   
+    end
 end

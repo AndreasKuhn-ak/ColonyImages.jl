@@ -42,7 +42,8 @@ export  conv,
         moving_avg,
         anisotropy_index,
         expand_matrix,
-        DataFrame_Colony
+        DataFrame_Colony,
+        initialize_colonies
 
         
         
