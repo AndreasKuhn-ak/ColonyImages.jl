@@ -8,11 +8,13 @@ This function creates and returns an empty DataFrame with a predefined structure
     - `data_set::String[]`: A column for the dataset names.
     - `colony::String[]`: A column for the colony names.
     - `time::Int[]`: A column for the time points.
-    - `metric_OG::Vector{Vector{Int64}}`: A column for the original metric data. Each entry is a vector of integers.
-    - `metric_cov::Vector{Vector{Int64}}`: A column for the metric data after convolution. Each entry is a vector of integers.
-    - `pair_OG::Vector{Vector{Int64}}`: A column for the original pair correlation data. Each entry is a vector of integers.
-    - `pair_cov::Vector{Vector{Int64}}`: A column for the pair correlation data after convolution. Each entry is a vector of integers.
-    - `OG_size::Int[]`: A column for the original sizes of the colonies in pixels, used for later normalizations.
+    - `metric_OG::Vector{Vector{Int64}}`: A column for the angular metric data calculated using the stacking approach. Each entry is a vector of integers.
+    - `metric_cov::Vector{Vector{Int64}}`: A column for the angular metric data calculated using the convolution approach. Each entry is a vector of integers.
+    - `pair_OG::Vector{Vector{Int64}}`: A column for the pair correlation calculated using the stacking approach. Each entry is a vector of integers.
+    - `pair_cov::Vector{Vector{Int64}}`: A column for the pair correlation calculated using the convolution approach. Each entry is a vector of integers.
+    - `OG_size::Int[]`: A column for the sizes of the colonies in pixels at t = 0, used for later normalizations.
+    - `border_points::Vector{Vector{CartesianIndex{2}}}`: A column for the border points of the colonies. Each entry is a vector of CartesianIndex{2}.
+    - `Parameters::Vector{parameters}`: A column for the parameters used in the simulation or analysis. Each entry is a `parameters` object.
 
 # Example
 ```julia

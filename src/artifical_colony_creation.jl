@@ -217,55 +217,6 @@ end
 
 
 
-"""
-    expand_colony_radom!(img::AbstractArray, pixels_to_add::Int)
-
-This function expands a colony in a random pattern within an image. The expansion is performed by adding pixels to the border of the colony. 
-The function directly modifies the input image. 
-
-# Arguments
-- `img::AbstractArray`: The input image where the colony will be expanded.
-- `pixels_to_add::Int`: The number of pixels to add to the colony.
-
-Compared to `expand_colony_radom_cov!`, this function is slower for large images and many pixels to add,
- but faster for small images and and fewer pixels to add .This is due to the fact that the computational heavy convolution only needs to be 
-    calculated once for the whole image, whereas the distance transform in `expand_colony_radom` needs to be calculated for each iteration of the loop.
-"""
-function expand_colony_radom!(img::AbstractArray, pixels_to_add::Int)
-    # Initialize the pixel count
-    pix_count = 0
-
-    # Find the border points of the colony and shuffle them
-    border_points = shuffle!(findall((distance_transform(feature_transform(img)).== 1)))
-    shuffle_counter = 0
-
-    # Loop until the desired number of pixels have been added
-    while pix_count < pixels_to_add
-        # For each point in the shuffled border points
-        for point in border_points
-            # If the pixel at the point is not black yet, make it black
-            if img[point] == 0
-                img[point] = 1
-                pix_count += 1
-            end
-
-            # Increment the shuffle counter
-            shuffle_counter += 1
-            
-            # If the shuffle counter reaches 10% of the length of the border points, break the loop
-            if shuffle_counter >= length(border_points)*0.1
-                break
-            end            
-        end
-
-        # Find the new border points of the colony and shuffle them
-        border_points = shuffle!(findall((distance_transform(feature_transform(img)).== 1)))
-        shuffle_counter = 0 
-    end
-end
-    
-
-
 
 """
     expand_colony_un_radom_cov!(img::AbstractArray, pixels_to_add::Int, dir::Vector{Int}; still_spawn_rate::AbstractFloat = 0.5)
@@ -528,7 +479,7 @@ The function first creates an artificial colony using the `build_artifical_colon
 growth_colonies(vec_of_sims, para, Points)
 ```
 """	
-function growth_colonies(vec_of_sims::Vector{Vector{BitArray{3}}}, para::parameters,Points::Vector{Vector{Vector{Int}}})
+function growth_colonies!(vec_of_sims::Vector{Vector{BitArray{3}}}, para::parameters,Points::Vector{Vector{Vector{Int}}})
     # Initialize the vector to store the pixels to add and the image of the colony
     pixel_to_add_vec = Int[];
     copy_int_img = BitArray(zeros(Bool, para.im_size...,));

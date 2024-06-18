@@ -43,8 +43,8 @@ export  conv,
         anisotropy_index,
         expand_matrix,
         DataFrame_Colony,
-        initialize_colonies
-
+        initialize_colonies,
+        growth_colonies!
         
         
 
