@@ -434,23 +434,6 @@ function rad2deg_discrete(ϕ::AbstractFloat; steps::Int =360)
 end
 
 
-
-function angular_metric_shit(img, center; steps = 360)
-    angle_vec = zeros(Int64, steps)
-    for y in 1:size(img)[1], x in 1: size(img)[2]
-        if img[y,x] != 0
-            vec = [y,x] .- center
-            ϕ = atan(vec...)
-            step_index =rad2deg_discrete(ϕ, steps = steps)
-            angle_vec[step_index] += 1
-        end
-    end
-    #last and first circular segment are buggy due to discretions artefacts, mean of both of them
-    mean_angle = round(Int,mean([angle_vec[1], angle_vec[end]]))
-    angle_vec[1], angle_vec[end] = mean_angle,mean_angle
-    return angle_vec
-end
-
 """
     angular_metric(img::Union{Matrix{<:Real}, BitMatrix}, center::Vector{Int}; steps::Int = 360)
 
@@ -499,50 +482,6 @@ function angular_metric(img::Union{Matrix{<:Real}, BitMatrix}, center::Vector{In
     return angle_vec
 end
 
-
-function pair_cor_metric(img, center_1; samples = 10000, steps = 360)
-    angle_vec = zeros(Int64, steps)
-    stepsize = π/steps
-    y_size, x_size = size(img)
-    i = 0
-    while i < samples
-    #for i in 1:samples
-        v1 = [rand(1:y_size),rand(1:x_size)]
-        v2 = [rand(1:y_size),rand(1:x_size)]
-        if  img[v1...] != 0 && img[v2...] != 0
-            v1 = v1 .- center_1
-            v2 = v2 .- center_1
-            x = dot(v1,v2)/(norm(v1)*norm(v2))
-            angle = acos(x >1.0 ? 1.0 : x < -1.0 ? -1.0 : x)
-            step_index = (minimum([round(Int64,replace_nan(angle/stepsize)), steps-1]))
-            angle_vec[step_index+1] += 1
-            i += 1
-            #println(i)
-        end
-    end
-    return angle_vec
-end
-    
-function pair_cor_metric2(img, center; samples = 10000, steps = 360)
-    angle_vec = zeros(Int64, steps+1)
-    stepsize = π/steps
-    indizies = Tuple.(findall(x-> x != 0 ,img))
-    angles = Float64[]
-    for i in 1:samples
-        v1, v2  = sample(indizies, 2)
-        v1_v = v1 .- center 
-        v2_2 = v2 .- center
-        x = dot(v1_v,v2_2)/(norm(v1_v)*norm(v2_2))
-        angle = acos(x >1.0 ? 1.0 : x < -1.0 ? -1.0 : x)
-        step_index = round(Int64,replace_nan(angle/stepsize))
-        # sometimes step index can be bigger than 359 for unknown reasons, if so a random value between 0:359 is assigned
-        #step_index_final = step_index > 359 ? rand(0:359) : step_index 
-        angle_vec[step_index+1] += 1
-           
-       
-    end
-    return angle_vec
-end
 
 """
     pair_cor_metric3(img::Union{Matrix{<:Real}, BitMatrix}, center::Vector{Int}; samples::Int = 10000, steps::Int = 360)
