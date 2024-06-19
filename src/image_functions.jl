@@ -1,7 +1,7 @@
 """
     DataFrame_Colony()
 
-This function creates and returns an empty DataFrame with a predefined structure for storing analysis data in the `colonyimages` package.
+This function creates and returns an empty DataFrame with a predefined structure for storing analysis data in the `ColonyImages` package.
 
 # Returns
 - `df`: A DataFrame with the following columns:
@@ -355,6 +355,11 @@ function b_w(img)
     # If more than half of the image is black, invert the image
     if sum(img) >= prod(size(img))*0.5
         img = (img .-1) .*-1 
+    end
+    
+    # reverse the image if in wrong order 
+    if sum(img[:,:,1]) > sum(img[:,:,end])
+        reverse!(img, dims=3) 
     end
 
     # Convert the image to a BitArray and return it
