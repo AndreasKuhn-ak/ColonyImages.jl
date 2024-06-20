@@ -1,6 +1,6 @@
 # ColonyImages
 
-ColonyImages is a Julia package for quantification of Trypansoma colony images. It provides a set of functions to manipulate and analyze colony images. Additionally, it allows for the creation of artificial colony images that can be used as test data.
+ColonyImages is a Julia package for quantification of Trypanosoma colony images. It provides a set of functions to manipulate and analyze colony images. Additionally, it allows for the creation of artificial colony images that can be used as test data.
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://andreaskuhn-ak.github.io/ColonyImages.jl/)
 [![Build Status](https://github.com/AndreasKuhn-ak/ColonyImages.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/AndreasKuhn-ak/ColonyImages.jl/actions/workflows/CI.yml?query=branch%3Amaster)
@@ -21,9 +21,8 @@ using ColonyImages
 
 # Load a single image
 img = load("path_to_your_image.tif")
-#make it binary
+# Make it binary
 img_int = b_w(img)
-
 
 # Define the center of the circle
 center = centroid(img)
@@ -34,27 +33,33 @@ angular_metric = angular_metric(img, center)
 
 This will return a vector where each element represents the number of pixels in a certain angular sector of the image. You can then use this vector to analyze the spatial distribution of the colony in the image.
 
-To help users understand how to use these functions, we have provided a Jupyter notebook titled `image_pipeline_tutorial_notebook.ipynb`. This notebook walks through the process of analyzing some given test data using the functions in image_functions.jl. It provides a practical example of how these functions can be used to extract meaningful information from colony images. 
+
 
 ### Artificial Colony Creation
 
 The `artificial_colony_creation.jl` file contains functions for creating artificial colony images. These images can be used as test data for the image functions.
 
-### Usage
-Here is a basic example of how to use the expand_colony_radom_cov! function:
 
-```julia
-using ColonyImages
 
-img = zeros(100, 100)
-img[50:55, 50:55] .= 1
-expand_colony_radom_cov!(img, 100)
-```
+### Tutorial 
+
+To assist users in understanding how to utilize these functions, we have provided a Jupyter notebook titled `Tutorial.ipynb`. This notebook guides you through the process of analyzing test data using the functions in `image_functions.jl` and simulating colony growth using the functions from `artificial_colony_creation.jl`.
+
+It offers a practical example of our workflow to analyze and compare preprocessed colony images with simulated colonies.
+
+The image preprocessing of fluorescent colony images is automated in `Fiji` with a custom-written macro. We have also provided a tutorial (`Fiji_tutorial.pdf`) on how to use it, along with all necessary files in the `fiji` folder.
+
 ### Documentation
-For more detailed information about the functions and their usage, please refer to the [documentation](https://andreaskuhn-ak.github.io/ColonyImages.jl/).
+You are not confined to using `ColonyImages.jl` in a specific way. All functions are documented and can be used independently or in any combination of your choice. To access the documentation, use the `Julia` macros `@doc` or our custom macro `@h` for a more nicely formatted output of the docstrings. Alternatively, you can find all the [documentation](https://andreaskuhn-ak.github.io/ColonyImages.jl/) on our GitHub pages.
+
+### Further Content 
+We have also provided all Jupyter notebooks (image import, colony simulation, analysis) together with their outputs, that were used to create our paper `Quantification of Trypanosoma brucei social motility indicates different colony growth phases`. These notebooks can be used if you wish to reproduce our results. However, they are not documented, so we highly recommend working through the `tutorial.ipynb` first to gain an understanding of the workflow and the package.
 
 ### Contributing
 Contributions to ColonyImages are very welcome! If you have a feature request, bug report, or proposal, please open an issue on the GitHub repository.
 
 ### License
 ColonyImages is licensed under the MIT license.
+
+### Software Requirements
+All software & Julia packages and their respective versions are listed in the `requirements.md` file.
