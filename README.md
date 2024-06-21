@@ -22,7 +22,7 @@ To get started with ColonyImages.jl, follow these steps:
    ```bash
     julia  
       ``` 
-Within the Julia REPL, activate and instantiate the project:
+   Within the Julia REPL, activate and instantiate the project:
    ```julia
       using Pkg
       Pkg.activate(".")
