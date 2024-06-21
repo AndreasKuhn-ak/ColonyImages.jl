@@ -23,17 +23,17 @@ To get started with ColonyImages.jl, follow these steps:
     julia  
       ``` 
 Within the Julia REPL, activate and instantiate the project:
-```julia
-using Pkg
-Pkg.activate(".")
-Pkg.instantiate()
-```
+   ```julia
+      using Pkg
+      Pkg.activate(".")
+      Pkg.instantiate()
+   ```
 This sets up the environment with all necessary dependencies.
 
-3. **Using ColonyImages.jl**: Now, you can start using ColonyImages.jl in your Julia scripts or REPL.
-```julia
-using ColonyImages
-```
+4. **Using ColonyImages.jl**: Now, you can start using ColonyImages.jl in your Julia scripts or REPL.
+   ```julia
+      using ColonyImages
+   ```
 You're now ready to use the functions provided by ColonyImages.jl for analyzing and manipulating colony images.
 ## Features
 
