@@ -1,11 +1,41 @@
 # ColonyImages
 
-ColonyImages is a Julia package for quantification of Trypanosoma colony images. It provides a set of functions to manipulate and analyze colony images. Additionally, it allows for the creation of artificial colony images that can be used as test data.
+ColonyImages is a local Julia package for quantification of Trypanosoma colony images. It provides a set of functions to manipulate and analyze colony images. Additionally, it allows for the creation of artificial colony images that can be used as test data.
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://andreaskuhn-ak.github.io/ColonyImages.jl/)
 [![Build Status](https://github.com/AndreasKuhn-ak/ColonyImages.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/AndreasKuhn-ak/ColonyImages.jl/actions/workflows/CI.yml?query=branch%3Amaster)
 [![Coverage](https://codecov.io/gh/AndreasKuhn-ak/ColonyImages.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/AndreasKuhn-ak/ColonyImages.jl)
 
+## How to Use
+
+To get started with ColonyImages.jl, follow these steps:
+
+1. **Download the Repository**: Clone or download the ColonyImages.jl repository from GitHub to your local machine.
+
+   ```bash
+   git clone https://github.com/AndreasKuhn-ak/ColonyImages.jl.git  
+    ``` 
+2. **Navigate to the Package Directory**:  Open a terminal and change directory to the ColonyImages.jl folder.
+   ```bash
+   cd ColonyImages
+    ``` 
+3. **Activate the Julia Environment**: Start Julia in the terminal and activate the package environment.
+   ```bash
+    julia  
+      ``` 
+Within the Julia REPL, activate and instantiate the project:
+```julia
+using Pkg
+Pkg.activate(".")
+Pkg.instantiate()
+```
+This sets up the environment with all necessary dependencies.
+
+3. **Using ColonyImages.jl**: Now, you can start using ColonyImages.jl in your Julia scripts or REPL.
+```julia
+using ColonyImages
+```
+You're now ready to use the functions provided by ColonyImages.jl for analyzing and manipulating colony images.
 ## Features
 
 ### Image Functions
