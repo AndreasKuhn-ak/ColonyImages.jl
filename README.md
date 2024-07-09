@@ -47,6 +47,7 @@ Here is an example of how to use this function:
 
 ```julia
 using ColonyImages
+using FileIO
 
 # Load a single image
 img = load("path_to_your_image.tif")
@@ -54,10 +55,10 @@ img = load("path_to_your_image.tif")
 img_int = b_w(img)
 
 # Define the center of the circle
-center = centroid(img)
+center = centroid(img_int)
 
 # Calculate the angular metric
-angular_metric = angular_metric(img, center)
+angular_metric = angular_metric(img_int, center)
 ```
 
 This will return a vector where each element represents the number of pixels in a certain angular sector of the image. You can then use this vector to analyze the spatial distribution of the colony in the image.
