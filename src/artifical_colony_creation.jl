@@ -10,9 +10,9 @@ Initialize colonies for simulations.
 - `vec_of_sims`: A vector of vectors of `BitArray{3}` representing the initialized empty arrays which will later became colonies.
 
 """
-function initialize_colonies(para::parameters)
+function initialize_colonies(para::parameters, simulations)
     vec_of_sims = Vector{Vector{BitArray{3}}}(undef, 0)
-    for i in 1:length(para.simulations)
+    for i in 1:length(simulations)
         img_int_vec_1 = Vector{BitArray{3}}(undef, 0)
         for i in 1:para.colony_nr
             hans = BitArray(zeros(Bool, para.im_size..., para.stacks))
@@ -479,7 +479,7 @@ The function first creates an artificial colony using the `build_artifical_colon
 growth_colonies(vec_of_sims, para, Points)
 ```
 """	
-function growth_colonies!(vec_of_sims::Vector{Vector{BitArray{3}}}, para::parameters,Points::Vector{Vector{Vector{Int}}})
+function growth_colonies!(vec_of_sims::Vector{Vector{BitArray{3}}}, para::parameters,Points::Vector{Vector{Vector{Int}}},simulations)
     # Initialize the vector to store the pixels to add and the image of the colony
     pixel_to_add_vec = Int[];
     copy_int_img = BitArray(zeros(Bool, para.im_size...,));
@@ -489,7 +489,7 @@ function growth_colonies!(vec_of_sims::Vector{Vector{BitArray{3}}}, para::parame
     pixel_to_add_vec = para.pixel_to_add(copy_int_img);
 
     # Iterate over the simulations and colonies
-    for (x, sim) in collect(enumerate(para.simulations))
+    for (x, sim) in collect(enumerate(simulations))
         Threads.@threads for (i, colony) in collect(enumerate(vec_of_sims[x]))
             for (j, t) in enumerate(para.time_points)
                 # Use a view to work on the array directly

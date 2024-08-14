@@ -53,7 +53,6 @@ A struct that holds various parameters for colony image processing, creation and
     spawn_rate::AbstractFloat           = 0.2
     dir_match_rate_B::AbstractFloat     = 0.9993
     dir_match_rate_C::AbstractFloat     = 0.9993
-    simulations::Vector{String}         = ["Random", "Finger_weak", "Finger_strong"]
 end
 
 
