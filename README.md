@@ -4,7 +4,7 @@ ColonyImages is a local Julia package for quantification of Trypanosoma colony i
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://andreaskuhn-ak.github.io/ColonyImages.jl/)
 [![Build Status](https://github.com/AndreasKuhn-ak/ColonyImages.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/AndreasKuhn-ak/ColonyImages.jl/actions/workflows/CI.yml?query=branch%3Amaster)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12701062.svg)](https://doi.org/10.5281/zenodo.12701013)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.12701013.svg)](https://doi.org/10.5281/zenodo.12701013)
 
 
 
